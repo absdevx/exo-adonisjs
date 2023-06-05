@@ -18,28 +18,28 @@
 |
 */
 
-import Route from "@ioc:Adonis/Core/Route";
-import Task from "App/Models/Task";
+import Route from '@ioc:Adonis/Core/Route'
+import Task from 'App/Models/Task'
 
 /*
 Route.get('/', async ({ view }) => {
   return view.render('blog/index')
 })*/
 
-Route.post("/users", "UsersController.create");
-Route.get("/users", "UsersController.index");
+Route.post('/users', 'UsersController.create')
+Route.get('/users', 'UsersController.index')
 
-Route.post("/tasks", "TasksController.store");
+Route.post('/tasks', 'TasksController.store')
 /* Récupère toutes les tâches. */
 
-Route.get("/tasks/user/:id", "TasksController.index");
+Route.get('/tasks/user/:id', 'TasksController.index')
 /*  Récupère toutes les tâches attribuées à un 
 utilisateur spécifique en utilisant son identifiant. */
 
-Route.get("/users/:id", "UsersController.show");
+Route.get('/users/:id', 'UsersController.show')
 
-Route.get("/tasks", "TasksController.getTasks");
+Route.get('/tasks', 'TasksController.getTasks')
 
-Route.get("/tasks/:id/user", "TasksController.getUserByTask");
+Route.get('/tasks/:id/user', 'TasksController.getUserByTask')
 /*  Récupère l'utilisateur attribué à une tâche 
 spécifique en utilisant l'identifiant de la tâche. */
