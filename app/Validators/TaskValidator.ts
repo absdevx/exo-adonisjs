@@ -2,7 +2,7 @@ import { schema, CustomMessages, rules } from "@ioc:Adonis/Core/Validator";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import { TaskStatusList } from "App/Enums/TaskStatus";
 
-export default class TaskValidator {
+export class TaskValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public schema = schema.create({
@@ -12,17 +12,30 @@ export default class TaskValidator {
     user_id: schema.number([rules.exists({ table: "users", column: "id" })]),
   });
 
-  /**
-   * Custom messages for validation failures. You can make use of dot notation `(.)`
-   * for targeting nested fields and array expressions `(*)` for targeting all
-   * children of an array. For example:
-   *
-   * {
-   *   'profile.username.required': 'Username is required',
-   *   'scores.*.number': 'Define scores as valid numbers'
-   * }
-   *
-   */
+  public messages: CustomMessages = {
+    "title.*": "Titre invalide",
+    "description.*": "Description invalide",
+    "status.*": "Status incorrect",
+    "user_id.*": "ID utilisateur incorrect",
+  };
+}
+
+export class TaskUpdateValidator {
+  constructor(protected ctx: HttpContextContract) {}
+
+  public schema = schema.create({
+    id: schema.number([
+      rules.required(),
+      rules.exists({ table: "tasks", column: "id" }),
+    ]),
+    title: schema.string.optional(),
+    description: schema.string.optional(),
+    status: schema.enum.optional(TaskStatusList),
+    user_id: schema.number.optional([
+      rules.exists({ table: "users", column: "id" }),
+    ]),
+  });
+
   public messages: CustomMessages = {
     "title.*": "Titre invalide",
     "description.*": "Description invalide",

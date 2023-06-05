@@ -1,7 +1,9 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import User from "App/Models/User";
-import UserStoreValidator from "App/Validators/UserValidator";
-import Task from "App/Models/Task";
+import {
+  UserStoreValidator,
+  UserUpdateValidator,
+} from "App/Validators/UserValidator";
 
 /*
 
@@ -20,17 +22,26 @@ export default class UsersController {
     const pagination = await User.query()
       .select(["id", "name", "email"])
       .paginate(page, USER_PER_PAGE);
-    return response.json(pagination.all());
+    return response.json(pagination);
   }
 
-  public async create({ request, response }: HttpContextContract) {
+  public async store({ request, response }: HttpContextContract) {
     try {
       const trustedData = await request.validate(UserStoreValidator);
       const ret = await User.create(trustedData);
-
       return response.status(201).json(ret);
     } catch (error) {
       return response.status(400).json({ error: error.messages || error });
+    }
+  }
+
+  public async update({ request, response }: HttpContextContract) {
+    const trustedData = await request.validate(UserUpdateValidator);
+    try {
+      await User.query().where("id", trustedData.id).update(trustedData);
+      return response.ok(trustedData);
+    } catch (error) {
+      return response.badRequest("Failed to update user");
     }
   }
 
@@ -43,9 +54,19 @@ export default class UsersController {
         .preload("tasks")
         .select();
 
-      return response.status(201).json(data);
+      return response.ok(data);
     } catch (error) {
-      return response.status(400).json({ error: error.messages || error });
+      return response.badRequest({ error: error.messages || error });
+    }
+  }
+
+  public async delete({ request, response }: HttpContextContract) {
+    const trustedData = await request.validate(UserUpdateValidator);
+    try {
+      await User.query().where("id", trustedData.id).delete();
+      return response.ok("User deleted successfully");
+    } catch (error) {
+      return response.badRequest("Failed to delete user");
     }
   }
 }
