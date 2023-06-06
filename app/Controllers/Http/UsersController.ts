@@ -29,6 +29,7 @@ export default class UsersController {
     try {
       const trustedData = await request.validate(UserStoreValidator);
       const ret = await User.create(trustedData);
+      console.log(ret);
       return response.status(201).json(ret);
     } catch (error) {
       return response.status(400).json({ error: error.messages || error });

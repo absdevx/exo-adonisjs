@@ -9,10 +9,10 @@ export class TaskValidator {
     title: schema.string(),
     description: schema.string(),
     status: schema.enum(TaskStatusList),
-    user_id: schema.number([rules.exists({ table: "users", column: "id" })]),
+    user_id: schema.string([rules.exists({ table: "users", column: "id" })]),
     users: schema.array
       .optional([rules.requiredIfNotExists("user_id")])
-      .members(schema.number([rules.exists({ table: "users", column: "id" })])),
+      .members(schema.string([rules.exists({ table: "users", column: "id" })])),
   });
 
   public messages: CustomMessages = {
