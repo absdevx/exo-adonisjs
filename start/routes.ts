@@ -19,6 +19,9 @@
 */
 
 import Route from "@ioc:Adonis/Core/Route";
+import { ResponseContract } from "@ioc:Adonis/Core/Response";
+import Task from "App/Models/Task";
+import User from "App/Models/User";
 
 /*
 Route.get('/', async ({ view }) => {
@@ -55,6 +58,11 @@ Route.patch("/users", "UsersController.update");
 
 Route.delete("/users", "UsersController.delete");
 
-/*
-Test new feature
-*/
+Route.get("/test", async ({ response }: { response: ResponseContract }) => {
+  const user = await User.findOrFail(1);
+  user.related("tasks").create({
+    title: "Related task to user 1",
+    description: "Related desscription",
+  });
+  return response;
+});

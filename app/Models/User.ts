@@ -1,5 +1,12 @@
 import { DateTime } from "luxon";
-import { BaseModel, HasMany, column, hasMany } from "@ioc:Adonis/Lucid/Orm";
+import {
+  BaseModel,
+  HasMany,
+  ManyToMany,
+  column,
+  hasMany,
+  manyToMany,
+} from "@ioc:Adonis/Lucid/Orm";
 import Task from "App/Models/Task";
 
 export default class User extends BaseModel {
@@ -12,8 +19,10 @@ export default class User extends BaseModel {
   @column()
   public email: string;
 
-  @hasMany(() => Task)
-  public tasks: HasMany<typeof Task>;
+  @manyToMany(() => Task, {
+    pivotTable: "task_user",
+  })
+  public tasks: ManyToMany<typeof Task>;
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime;
