@@ -18,51 +18,14 @@
 |
 */
 
-<<<<<<< HEAD
-import Route from '@ioc:Adonis/Core/Route'
-import Task from 'App/Models/Task'
-=======
 import Route from "@ioc:Adonis/Core/Route";
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-import Task from "App/Models/Task";
-=======
->>>>>>> 92b904ee03fdebf57a9983e3af292de497ee9dca
->>>>>>> develop
 
 /*
 Route.get('/', async ({ view }) => {
   return view.render('blog/index')
 })*/
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-Route.post('/users', 'UsersController.create')
-Route.get('/users', 'UsersController.index')
-
-Route.post('/tasks', 'TasksController.store')
-/* Récupère toutes les tâches. */
-
-Route.get('/tasks/user/:id', 'TasksController.index')
-/*  Récupère toutes les tâches attribuées à un 
-utilisateur spécifique en utilisant son identifiant. */
-
-Route.get('/users/:id', 'UsersController.show')
-
-Route.get('/tasks', 'TasksController.getTasks')
-
-Route.get('/tasks/:id/user', 'TasksController.getUserByTask')
-/*  Récupère l'utilisateur attribué à une tâche 
-spécifique en utilisant l'identifiant de la tâche. */
-=======
-Route.post("/users", "UsersController.store");
-=======
 Route.post("/users", "UsersController.create");
-=======
-Route.post("/users", "UsersController.store");
->>>>>>> develop
->>>>>>> 92b904ee03fdebf57a9983e3af292de497ee9dca
 Route.get("/users", "UsersController.index");
 
 Route.post("/tasks", "TasksController.store");
@@ -75,23 +38,30 @@ utilisateur spécifique en utilisant son identifiant. */
 Route.get("/users/:id", "UsersController.show");
 
 Route.get("/tasks", "TasksController.getTasks");
-<<<<<<< HEAD
-// AAAAasasasa
-=======
-<<<<<<< HEAD
-=======
-// AAAAasasasa
->>>>>>> develop
->>>>>>> 92b904ee03fdebf57a9983e3af292de497ee9dca
 
 Route.get("/tasks/:id/user", "TasksController.getUserByTask");
 /*  Récupère l'utilisateur attribué à une tâche 
 spécifique en utilisant l'identifiant de la tâche. */
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
->>>>>>> 92b904ee03fdebf57a9983e3af292de497ee9dca
+Route.post("/users", "UsersController.store");
+Route.post("/users", "UsersController.create");
+Route.post("/users", "UsersController.store");
+Route.get("/users", "UsersController.index");
+
+Route.post("/tasks", "TasksController.store");
+/* Récupère toutes les tâches. */
+
+Route.get("/tasks/user/:id", "TasksController.index");
+/*  Récupère toutes les tâches attribuées à un 
+utilisateur spécifique en utilisant son identifiant. */
+
+Route.get("/users/:id", "UsersController.show");
+
+Route.get("/tasks", "TasksController.getTasks");
+// AAAAasasasa
+
+Route.get("/tasks/:id/user", "TasksController.getUserByTask");
+/*  Récupère l'utilisateur attribué à une tâche 
+spécifique en utilisant l'identifiant de la tâche. */
 
 Route.patch("/tasks", "TasksController.update");
 /* Met à jour le model Task avec les paramétres fournies */
@@ -103,4 +73,3 @@ Route.patch("/users", "UsersController.update");
 // Met à jour le model User en paramétre
 
 Route.delete("/users", "UsersController.delete");
->>>>>>> develop
