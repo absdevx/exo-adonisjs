@@ -54,3 +54,7 @@ Route.patch("/users", "UsersController.update");
 // Met à jour le model User en paramétre
 
 Route.delete("/users", "UsersController.delete");
+
+/*
+Test new feature
+*/
