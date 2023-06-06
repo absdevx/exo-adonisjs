@@ -19,9 +19,6 @@
 */
 
 import Route from "@ioc:Adonis/Core/Route";
-import { ResponseContract } from "@ioc:Adonis/Core/Response";
-import Task from "App/Models/Task";
-import User from "App/Models/User";
 
 /*
 Route.get('/', async ({ view }) => {
@@ -40,13 +37,13 @@ Route.get("/tasks", "TasksController.getTasks");
 Route.patch("/tasks", "TasksController.update");
 /* Met à jour le model Task avec les paramétres fournies */
 
-Route.delete("/tasks/:id", "TasksController.delete");
+Route.delete("/tasks/:id", "TasksController.destroy");
 /* Supprime le model Task en paramétre en utitisant l'ID fournie */
 
 Route.patch("/users", "UsersController.update");
 // Met à jour le model User en paramétre
 
-Route.delete("/users/:id", "UsersController.delete");
+Route.delete("/users/:id", "UsersController.destroy");
 
 Route.get("/tasks/user/:id", "TasksController.index");
 /*  Récupère toutes les tâches attribuées à un 
@@ -58,7 +55,7 @@ Route.get("/tasks/:id/user", "TasksController.getUserByTask");
 /*  Récupère l'utilisateur attribué à une tâche 
 spécifique en utilisant l'identifiant de la tâche. */
 
-Route.post("/tttt", async () => {
+/* Route.post("/tttt", async () => {
   const user = await User.findOrFail(1);
   return user;
 
@@ -68,3 +65,4 @@ Route.post("/tttt", async () => {
   });
   return user;
 });
+ */

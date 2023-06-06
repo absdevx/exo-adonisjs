@@ -26,10 +26,10 @@ export default class UsersController {
   }
 
   public async store({ request, response }: HttpContextContract) {
+    const trustedData = await request.validate(UserStoreValidator);
     try {
-      const trustedData = await request.validate(UserStoreValidator);
       const ret = await User.create(trustedData);
-      console.log(ret);
+
       return response.status(201).json(ret);
     } catch (error) {
       return response.status(400).json({ error: error.messages || error });
@@ -64,10 +64,13 @@ export default class UsersController {
   public async destroy({ params, response }: HttpContextContract) {
     const trustedData = await params.id;
     try {
-      await User.query().where("id", trustedData.id).delete();
+      await User.query().where("id", trustedData).delete();
       return response.ok("User deleted successfully");
     } catch (error) {
-      return response.badRequest("Failed to delete user");
+      return response.badRequest({
+        error: "Failed to delete user",
+        data: error.messages || error,
+      });
     }
   }
 }

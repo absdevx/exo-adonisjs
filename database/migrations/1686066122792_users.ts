@@ -8,11 +8,14 @@ export default class extends BaseSchema {
       table
         .uuid("id")
         .primary()
+        .unique()
         .notNullable()
         .defaultTo(this.raw("uuid_generate_v4()"));
 
       table.string("name").notNullable();
       table.string("email").notNullable();
+      table.timestamp("created_at", { useTz: true });
+      table.timestamp("updated_at", { useTz: true });
     });
   }
 

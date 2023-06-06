@@ -2,7 +2,7 @@
   "extends": "adonis-preset-ts/tsconfig.json",
   "include": [
     "**/*"
-  ],
+, "app/Models/backupUser.xyz"  ],
   "exclude": [
     "node_modules",
     "build"

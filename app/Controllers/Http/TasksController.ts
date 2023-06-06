@@ -23,6 +23,7 @@ export default class TasksController {
         user_id: trustedData.user_id,
       };
       const newTask = await Task.create(task);
+      console.log(newTask);
       await newTask.related("manyUsers").saveMany(users);
 
       return response.ok(task);
@@ -33,10 +34,7 @@ export default class TasksController {
 
   public async index({ params, response }: HttpContextContract) {
     const paramId = params.id;
-    /* const tasks = await Task.query()
-      .join("users", "tasks.user_id", "users.id")
-      .select(["*"]); */
-    // const tasks = await Task.query().preload("user").select(["*"]);
+
     const tasks = await Database.from("tasks")
       .join("users", "tasks.user_id", "users.id")
       .where("users.id", paramId)
@@ -58,7 +56,7 @@ export default class TasksController {
         "tasks.title",
         "tasks.description",
         "tasks.status",
-        "name as username",
+        "users.name as username",
       ]);
     return response.ok(tasks);
   }
@@ -73,7 +71,7 @@ export default class TasksController {
     }
   }
 
-  public async delete({ params, response }: HttpContextContract) {
+  public async destroy({ params, response }: HttpContextContract) {
     const paramId = params.id;
     try {
       await Task.query().where("id", paramId).delete();

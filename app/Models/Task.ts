@@ -25,7 +25,7 @@ export default class Task extends BaseModel {
   public status: string;
 
   @column()
-  public userId: number;
+  public userId: string;
 
   @hasMany(() => User)
   public manyUsers: HasMany<typeof User>;
