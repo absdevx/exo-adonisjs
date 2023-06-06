@@ -12,13 +12,18 @@ export default class TasksController {
     const trustedData = await request.validate(TaskValidator);
 
     const usersId = trustedData.users || [trustedData.user_id];
+    console.log(usersId);
     const users = await Database.from("users").whereIn("id", usersId);
 
-    console.log(trustedData);
-
     try {
-      const task = await Task.create(trustedData);
-      task.related("manyUsers").saveMany(users);
+      const task = {
+        title: trustedData.title,
+        description: trustedData.description,
+        status: trustedData.status,
+        user_id: trustedData.user_id,
+      };
+      const newTask = await Task.create(task);
+      await newTask.related("manyUsers").saveMany(users);
 
       return response.ok(task);
     } catch (error) {
