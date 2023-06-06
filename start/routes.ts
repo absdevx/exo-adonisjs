@@ -34,35 +34,37 @@ Route.get("/users", "UsersController.index");
 Route.post("/tasks", "TasksController.store");
 /* Récupère toutes les tâches. */
 
+Route.get("/tasks", "TasksController.getTasks");
+// AAAAasasasa
+
+Route.patch("/tasks", "TasksController.update");
+/* Met à jour le model Task avec les paramétres fournies */
+
+Route.delete("/tasks/:id", "TasksController.delete");
+/* Supprime le model Task en paramétre en utitisant l'ID fournie */
+
+Route.patch("/users", "UsersController.update");
+// Met à jour le model User en paramétre
+
+Route.delete("/users/:id", "UsersController.delete");
+
 Route.get("/tasks/user/:id", "TasksController.index");
 /*  Récupère toutes les tâches attribuées à un 
 utilisateur spécifique en utilisant son identifiant. */
 
 Route.get("/users/:id", "UsersController.show");
 
-Route.get("/tasks", "TasksController.getTasks");
-// AAAAasasasa
-
 Route.get("/tasks/:id/user", "TasksController.getUserByTask");
 /*  Récupère l'utilisateur attribué à une tâche 
 spécifique en utilisant l'identifiant de la tâche. */
 
-Route.patch("/tasks", "TasksController.update");
-/* Met à jour le model Task avec les paramétres fournies */
-
-Route.delete("/tasks", "TasksController.delete");
-/* Supprime le model Task en paramétre en utitisant l'ID fournie */
-
-Route.patch("/users", "UsersController.update");
-// Met à jour le model User en paramétre
-
-Route.delete("/users", "UsersController.delete");
-
-Route.get("/test", async ({ response }: { response: ResponseContract }) => {
+Route.post("/tttt", async () => {
   const user = await User.findOrFail(1);
-  user.related("tasks").create({
+  return user;
+
+  await user.related("tasks").create({
     title: "Related task to user 1",
     description: "Related desscription",
   });
-  return response;
+  return user;
 });

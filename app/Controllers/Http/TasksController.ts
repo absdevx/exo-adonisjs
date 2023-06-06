@@ -10,8 +10,15 @@ import {
 export default class TasksController {
   public async store({ request, response }: HttpContextContract) {
     const trustedData = await request.validate(TaskValidator);
+
+    const usersId = trustedData.users || [trustedData.user_id];
+    const users = await Database.from("users").whereIn("id", usersId);
+
+    console.log(trustedData);
+
     try {
       const task = await Task.create(trustedData);
+      task.related("manyUsers").saveMany(users);
 
       return response.ok(task);
     } catch (error) {
@@ -61,8 +68,8 @@ export default class TasksController {
     }
   }
 
-  public async delete({ params, response, request }: HttpContextContract) {
-    const paramId = (await request.validate(TaskUpdateValidator)).id;
+  public async delete({ params, response }: HttpContextContract) {
+    const paramId = params.id;
     try {
       await Task.query().where("id", paramId).delete();
       return response.ok({ message: "Task delete successfully" });

@@ -60,8 +60,8 @@ export default class UsersController {
     }
   }
 
-  public async delete({ request, response }: HttpContextContract) {
-    const trustedData = await request.validate(UserUpdateValidator);
+  public async destroy({ params, response }: HttpContextContract) {
+    const trustedData = await params.id;
     try {
       await User.query().where("id", trustedData.id).delete();
       return response.ok("User deleted successfully");

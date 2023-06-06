@@ -2,9 +2,11 @@ import { DateTime } from "luxon";
 import {
   BaseModel,
   BelongsTo,
+  HasMany,
   ManyToMany,
   belongsTo,
   column,
+  hasMany,
   manyToMany,
 } from "@ioc:Adonis/Lucid/Orm";
 import User from "App/Models/User";
@@ -24,6 +26,9 @@ export default class Task extends BaseModel {
 
   @column()
   public userId: number;
+
+  @hasMany(() => User)
+  public manyUsers: HasMany<typeof User>;
 
   @belongsTo(() => User)
   public user: BelongsTo<typeof User>;

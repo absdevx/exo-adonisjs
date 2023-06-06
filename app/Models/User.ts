@@ -19,6 +19,7 @@ export default class User extends BaseModel {
   @column()
   public email: string;
 
+
   @manyToMany(() => Task, {
     pivotTable: "task_user",
   })
