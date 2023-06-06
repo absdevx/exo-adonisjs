@@ -8,6 +8,7 @@
 |
 | For the most part you will never edit this file. The configuration
 | for the tests can be controlled via ".adonisrc.json" and
+<<<<<<< HEAD
 | "tests/bootstrap.ts" files.
 |
 */
@@ -28,6 +29,33 @@ kernel
   .then(() => import('./tests/bootstrap'))
   .then(({ runnerHooks, ...config }) => {
     const app: RunnerHooksHandler[] = [() => kernel.start()]
+=======
+| "tests/bootstrap.ts" files. Make data more secured
+|
+*/
+
+process.env.NODE_ENV = "test";
+
+import "reflect-metadata";
+import sourceMapSupport from "source-map-support";
+import { Ignitor } from "@adonisjs/core/build/standalone";
+import {
+  configure,
+  processCliArgs,
+  run,
+  RunnerHooksHandler,
+} from "@japa/runner";
+
+sourceMapSupport.install({ handleUncaughtExceptions: false });
+
+const kernel = new Ignitor(__dirname).kernel("test");
+
+kernel
+  .boot()
+  .then(() => import("./tests/bootstrap"))
+  .then(({ runnerHooks, ...config }) => {
+    const app: RunnerHooksHandler[] = [() => kernel.start()];
+>>>>>>> develop
 
     configure({
       ...kernel.application.rcFile.tests,
@@ -38,8 +66,16 @@ kernel
         setup: app.concat(runnerHooks.setup),
         teardown: runnerHooks.teardown,
       },
+<<<<<<< HEAD
       cwd: kernel.application.appRoot
     })
 
     run()
   })
+=======
+      cwd: kernel.application.appRoot,
+    });
+
+    run();
+  });
+>>>>>>> develop

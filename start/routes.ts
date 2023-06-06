@@ -18,14 +18,19 @@
 |
 */
 
+<<<<<<< HEAD
 import Route from '@ioc:Adonis/Core/Route'
 import Task from 'App/Models/Task'
+=======
+import Route from "@ioc:Adonis/Core/Route";
+>>>>>>> develop
 
 /*
 Route.get('/', async ({ view }) => {
   return view.render('blog/index')
 })*/
 
+<<<<<<< HEAD
 Route.post('/users', 'UsersController.create')
 Route.get('/users', 'UsersController.index')
 
@@ -43,3 +48,34 @@ Route.get('/tasks', 'TasksController.getTasks')
 Route.get('/tasks/:id/user', 'TasksController.getUserByTask')
 /*  Récupère l'utilisateur attribué à une tâche 
 spécifique en utilisant l'identifiant de la tâche. */
+=======
+Route.post("/users", "UsersController.store");
+Route.get("/users", "UsersController.index");
+
+Route.post("/tasks", "TasksController.store");
+/* Récupère toutes les tâches. */
+
+Route.get("/tasks/user/:id", "TasksController.index");
+/*  Récupère toutes les tâches attribuées à un 
+utilisateur spécifique en utilisant son identifiant. */
+
+Route.get("/users/:id", "UsersController.show");
+
+Route.get("/tasks", "TasksController.getTasks");
+// AAAAasasasa
+
+Route.get("/tasks/:id/user", "TasksController.getUserByTask");
+/*  Récupère l'utilisateur attribué à une tâche 
+spécifique en utilisant l'identifiant de la tâche. */
+
+Route.patch("/tasks", "TasksController.update");
+/* Met à jour le model Task avec les paramétres fournies */
+
+Route.delete("/tasks", "TasksController.delete");
+/* Supprime le model Task en paramétre en utitisant l'ID fournie */
+
+Route.patch("/users", "UsersController.update");
+// Met à jour le model User en paramétre
+
+Route.delete("/users", "UsersController.delete");
+>>>>>>> develop
