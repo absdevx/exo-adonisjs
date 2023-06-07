@@ -1,6 +1,6 @@
 import { schema, CustomMessages, rules } from "@ioc:Adonis/Core/Validator";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import { TaskStatusList } from "App/Enums/TaskStatus";
+import { TaskStatus, TaskStatusList } from "App/Enums/TaskStatus";
 
 export class TaskValidator {
   constructor(protected ctx: HttpContextContract) {}
@@ -27,16 +27,13 @@ export class TaskUpdateValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public schema = schema.create({
-    id: schema.number([
+    id: schema.string([
       rules.required(),
       rules.exists({ table: "tasks", column: "id" }),
     ]),
     title: schema.string.optional(),
     description: schema.string.optional(),
-    status: schema.enum.optional(TaskStatusList),
-    user_id: schema.number.optional([
-      rules.exists({ table: "users", column: "id" }),
-    ]),
+    status: schema.enum.optional(Object.values(TaskStatus)),
   });
 
   public messages: CustomMessages = {

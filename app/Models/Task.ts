@@ -1,19 +1,15 @@
 import { DateTime } from "luxon";
 import {
   BaseModel,
-  BelongsTo,
-  HasMany,
   ManyToMany,
-  belongsTo,
   column,
-  hasMany,
   manyToMany,
 } from "@ioc:Adonis/Lucid/Orm";
 import User from "App/Models/User";
 
 export default class Task extends BaseModel {
   @column({ isPrimary: true })
-  public id: number;
+  public id: string;
 
   @column()
   public title: string;

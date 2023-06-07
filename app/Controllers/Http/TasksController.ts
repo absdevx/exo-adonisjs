@@ -69,7 +69,17 @@ export default class TasksController {
 
     const trustedData = await request.validate(TaskUpdateValidator);
     try {
-      await Task.query().where("id", trustedData.id).update(trustedData);
+      const task = await Task.findOrFail(trustedData.id);
+      const userIds = await task.related('users').query()
+      await task.merge({ title: trustedData.title, description: trustedData.description}).save();
+
+      if (trustedData.status) {
+        await task
+          .related("users")
+          .pivotQuery
+          
+      }
+
       return response.ok(trustedData);
     } catch (error) {
       return response.badRequest("Failed to update your task");
@@ -87,5 +97,4 @@ export default class TasksController {
       return response.badRequest(error.messages || error);
     }
   }
-
 }

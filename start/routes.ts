@@ -25,31 +25,35 @@ Route.get('/', async ({ view }) => {
   return view.render('blog/index')
 })*/
 
-Route.post("/users", "UsersController.store");
-/* Crée un nouveau User */
-Route.get("/users", "UsersController.index");
-// Listing des Users disponibles
+const API_PREFIX = "/api/v1"
 
-Route.post("/tasks", "TasksController.store");
-/* Crée un nouvel Tasks */
+Route.group(() => {
+  Route.post("/users", "UsersController.store");
+  /* Crée un nouveau User */
+  Route.get("/users", "UsersController.index");
+  // Listing des Users disponibles
+  Route.patch("/users", "UsersController.update");
+  // Met à jour le User avec les paramétres fournies
+  Route.delete("/users/:id", "UsersController.destroy");
+  // Supprime le User avec l'ID en paramètre
+  Route.get("/users/:id", "UsersController.show");
+  // Affiche un User à l'aide de son ID
+}).prefix(API_PREFIX)
 
-Route.patch("/tasks", "TasksController.update");
-/* Met à jour le Task avec les paramétres fournies */
 
-Route.delete("/tasks/:id", "TasksController.destroy");
-/* Supprime le Task en paramétre en utitisant l'ID fournie */
+Route.group(() => {
+  Route.get("/tasks", "TasksController.getTasks");
+  // Listing des tasks
 
-Route.patch("/users", "UsersController.update");
-// Met à jour le User avec les paramétres fournies
+  Route.post("/tasks", "TasksController.store");
+  /* Crée un nouvel Tasks */
 
-Route.delete("/users/:id", "UsersController.destroy");
-// Supprime le User avec l'ID en paramètre
+  Route.patch("/tasks", "TasksController.update");
+  /* Met à jour le Task avec les paramétres fournies */
 
-Route.get("/tasks/user/:id", "TasksController.index");
-/*  Récupère toutes les Task attribuées à un 
-User spécifique en utilisant son identifiant. */
+  Route.delete("/tasks/:id", "TasksController.destroy");
+  /* Supprime le Task en paramétre en utitisant l'ID fournie */
 
-Route.get("/users/:id", "UsersController.show");
-/*
-Affiche un User à l'aide de son ID
-*/
+  Route.get("/tasks/user/:id", "TasksController.index");
+  /*  Récupère toutes les Task attribuées à un User spécifique en utilisant son identifiant. */
+}).prefix(API_PREFIX)
