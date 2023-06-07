@@ -25,34 +25,23 @@ Route.get('/', async ({ view }) => {
   return view.render('blog/index')
 })*/
 
-const API_PREFIX = "";
-
 Route.group(() => {
   Route.post("/users", "UsersController.store");
-  /* Crée un nouveau User */
   Route.get("/users", "UsersController.index");
-  // Listing des Users disponibles
-  Route.patch("/users", "UsersController.update");
-  // Met à jour le User avec les paramétres fournies
+  Route.patch("/users/:id", "UsersController.update");
   Route.delete("/users/:id", "UsersController.destroy");
-  // Supprime le User avec l'ID en paramètre
   Route.get("/users/:id", "UsersController.show");
-  // Affiche un User à l'aide de son ID
 });
 
 Route.group(() => {
-  Route.get("/tasks", "TasksController.getTasks");
+  Route.get("/tasks", "TasksController.index");
   // Listing des tasks
-
   Route.post("/tasks", "TasksController.store");
   /* Crée un nouvel Tasks */
-
-  Route.patch("/tasks", "TasksController.update");
+  Route.patch("/tasks/:id", "TasksController.update");
   /* Met à jour le Task avec les paramétres fournies */
-
   Route.delete("/tasks/:id", "TasksController.destroy");
   /* Supprime le Task en paramétre en utitisant l'ID fournie */
-
-  Route.get("/tasks/user/:id", "TasksController.index");
+  Route.get("/tasks/user/:id", "TasksController.getTasksByUser");
   /*  Récupère toutes les Task attribuées à un User spécifique en utilisant son identifiant. */
 });

@@ -1,5 +1,7 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import Database from "@ioc:Adonis/Lucid/Database";
 import User from "App/Models/User";
+import { IDValidator } from "App/Validators/IDValidator";
 import {
   UserStoreValidator,
   UserUpdateValidator,
@@ -20,9 +22,17 @@ export default class UsersController {
     // Listing des Users disponibles avec pagination avec un nombre d'elements par page selon USER_PER_PAGE
 
     const page = request.input("page", 1);
+    const max_of_limit = await User.query().count('id')
+
+    let limit = request.input("limit", USER_PER_PAGE)  
+    if (limit > max_of_limit) limit = max_of_limit
+    // Quand la limite de 
+    
+    return limit
+
     const pagination = await User.query()
       .select(["id", "name", "email"])
-      .paginate(page, USER_PER_PAGE);
+      .paginate(page, limit);
 
     return response.json(pagination);
   }
@@ -38,11 +48,12 @@ export default class UsersController {
     }
   }
 
-  public async update({ request, response }: HttpContextContract) {
+  public async update({ request, params, response }: HttpContextContract) {
     // Met à jour le User avec les paramétres fournies
-    const trustedData = await request.validate(UserUpdateValidator);
+    const {id} = await IDValidator.validate(params, "users");
+    const trustedData = await request.validate(UserUpdateValidator)
     try {
-      await User.query().where("id", trustedData.id).update(trustedData);
+      await User.query().where("id", id).update(trustedData);
       return response.ok(trustedData);
     } catch (error) {
       return response.badRequest("Failed to update user");
@@ -51,11 +62,11 @@ export default class UsersController {
 
   public async show({ params, response }: HttpContextContract) {
     /* Affiche un User à l'aide de son ID */
-    const paramId = params.id;
+    const {id} = await IDValidator.validate(params, 'users')
 
     try {
       const data = await User.query()
-        .where("id", paramId)
+        .where("id", id)
         .preload("tasks")
         .select();
 
@@ -70,7 +81,7 @@ export default class UsersController {
 
     const trustedData = await params.id;
     try {
-      await User.query().where("id", trustedData).delete();
+      await Database.from('users').where('id', trustedData).delete()
       return response.ok("User deleted successfully");
     } catch (error) {
       return response.badRequest({

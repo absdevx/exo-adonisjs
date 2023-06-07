@@ -3,53 +3,43 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import { TaskStatus } from "App/Enums/TaskStatus";
 import Task from "App/Models/Task";
 import User from "App/Models/User";
+import { IDValidator } from "App/Validators/IDValidator";
 import {
   TaskValidator,
   TaskUpdateValidator,
 } from "App/Validators/TaskValidator";
 
 export default class TasksController {
+  /* Crée un nouvel Task avec les paramètres fournies: */
   public async store({ request, response }: HttpContextContract) {
-    /* Crée un nouvel Task avec les paramètres fournies:
-     */
-
-    const trustedData = await request.validate(TaskValidator);
-    const userIds = trustedData.users;
+    const { users, title, description } = await request.validate(TaskValidator);
     const task = {
-      title: trustedData.title,
-      description: trustedData.description,
+      title: title,
+      description: description,
     };
-
+    TODO: "Trouve dans la doc une maniere plus approprie de gerer cette partie";
     try {
       const newTask = await Task.create(task);
-      await newTask.related("users").attach(userIds);
-
-      for (let i = 0; i < userIds.length; i++) {
-        await Database.from("task_user")
-          .where("task_id", newTask.id)
-          .where("user_id", userIds[i])
-          .update({ status: TaskStatus.EN_COURS });
-      }
-
+      await newTask.related("users").attach(users);
       return response.ok(newTask);
     } catch (error) {
       return response.badRequest({ error: error.messages || error });
     }
   }
-
-  public async index({ params, response }: HttpContextContract) {
-    /*  Récupère toutes les Task attribuées à un User spécifique en utilisant son identifiant. */
-    const paramId = params.id;
+  /*  Récupère toutes les Task attribuées à un User spécifique en utilisant son identifiant. */
+  TODO: "Recuperer toute les tâches avec le nombre d'utilisateur pour chaque tâche";
+  public async getTasksByUser({ params, response }: HttpContextContract) {
+    const { id } = await IDValidator.validate(params, "users");
 
     const tasks = await Database.from("tasks")
       .join("task_user", "task_user.task_id", "tasks.id")
-      .where("task_user.user_id", paramId)
+      .where("task_user.user_id", id)
       .select(["tasks.*", "status"]);
     return response.ok(tasks);
   }
-
-  public async getTasks({ response }: HttpContextContract) {
-    /* Récupère toutes les Tasks */
+  /* Récupère toutes les Tasks */
+  public async index({ response }: HttpContextContract) {
+    TODO: "Ajouter la fonction show, recuperer une tâche specific avec les infos des utilisateus assigne";
 
     const tasks = await Database.from("task_user")
       .join("users", "task_user.user_id", "users.id")
@@ -64,34 +54,49 @@ export default class TasksController {
     return response.ok(tasks);
   }
 
-  public async update({ request, response }: HttpContextContract) {
-    /* Met à jour le Task avec les paramétres fournies */
+  /* Met à jour le Task avec les paramétres fournies */
+  public async update({ params, request, response }: HttpContextContract) {
+    TODO: "recuperer l'id autrement, ajouter un custom validateur pour les ids";
 
-    const trustedData = await request.validate(TaskUpdateValidator);
+    const { id } = await IDValidator.validate(params, "tasks");
+    const { title, status, description, users } = await request.validate(
+      TaskUpdateValidator
+    );
     try {
-      const task = await Task.findOrFail(trustedData.id);
-      const userIds = await task.related('users').query()
-      await task.merge({ title: trustedData.title, description: trustedData.description}).save();
+      // const task = await Task.findOrFail(trustedData.id);
+      const task = await Task.query().where('id', id).preload('users').firstOrFail()
+      await task.merge({
+        title: title,
+        description: description,
+      }).save();
 
-      if (trustedData.status) {
+      // const oldUsers = task.related('users').query()
+      const pivotData = users.reduce((data, userId) => {
+        data[userId] = {
+          status: status,
+        };
+        return data;
+      }, {});
+
+      await task.related("users").sync(pivotData, false);
+
+      /* await task.related("users").attach(users);
         await task
           .related("users")
-          .pivotQuery
-          
-      }
-
-      return response.ok(trustedData);
+          .pivotQuery()
+          .whereIn("user_id", users)
+          .update({ status: status }); */
+      return response.ok(task);
     } catch (error) {
       return response.badRequest("Failed to update your task");
     }
   }
-
+  /* Supprime le Task en paramétre en utitisant l'ID fournie */
   public async destroy({ params, response }: HttpContextContract) {
-    /* Supprime le Task en paramétre en utitisant l'ID fournie */
+    const { id } = await IDValidator.validate(params, "tasks");
 
-    const paramId = params.id;
     try {
-      await Task.query().where("id", paramId).delete();
+      await Task.query().where("id", id).delete();
       return response.ok({ message: "Task delete successfully" });
     } catch (error) {
       return response.badRequest(error.messages || error);

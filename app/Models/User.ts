@@ -5,7 +5,7 @@ import {
   column,
   manyToMany,
 } from "@ioc:Adonis/Lucid/Orm";
-import Task from "./Task";
+import Task from "App/Models/Task";
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
