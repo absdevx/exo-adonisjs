@@ -19,6 +19,7 @@ export default class User extends BaseModel {
 
   @manyToMany(() => Task, {
     pivotTable: "task_user",
+    pivotColumns: ["status"],
   })
   public tasks: ManyToMany<typeof Task>;
 

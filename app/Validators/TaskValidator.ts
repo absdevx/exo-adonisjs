@@ -9,11 +9,9 @@ export class TaskValidator {
     title: schema.string(),
     description: schema.string(),
     status: schema.enum(TaskStatusList),
-    user_id: schema.string.optional([
-      rules.exists({ table: "users", column: "id" }),
-    ]),
-    users: schema.array
-      .optional([rules.requiredIfNotExists("user_id")])
+
+    users: schema
+      .array([rules.requiredIfNotExists("user_id")])
       .members(schema.string([rules.exists({ table: "users", column: "id" })])),
   });
 

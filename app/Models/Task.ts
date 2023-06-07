@@ -21,19 +21,12 @@ export default class Task extends BaseModel {
   @column()
   public description: string;
 
-  @column()
-  public status: string;
-
-  @column()
-  public userId: string;
-
-  @hasMany(() => User)
-  public manyUsers: HasMany<typeof User>;
-
-  @belongsTo(() => User)
-  public user: BelongsTo<typeof User>;
-
-  @manyToMany(() => User, { pivotTable: "task_user" })
+  @manyToMany(() => User, {
+    pivotTable: "task_user",
+    pivotForeignKey: "task_id", // Clé étrangère vers le modèle User
+    pivotRelatedForeignKey: "user_id", // Clé étrangère vers le modèle Role
+    pivotColumns: ["status"],
+  })
   public users: ManyToMany<typeof User>;
 
   @column.dateTime({ autoCreate: true })

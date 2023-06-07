@@ -1,5 +1,6 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import Database from "@ioc:Adonis/Lucid/Database";
+import { TaskStatus } from "App/Enums/TaskStatus";
 import Task from "App/Models/Task";
 import User from "App/Models/User";
 import {
@@ -11,22 +12,25 @@ export default class TasksController {
   public async store({ request, response }: HttpContextContract) {
     const trustedData = await request.validate(TaskValidator);
 
-    const usersId = trustedData.users || [trustedData.user_id];
-    console.log(usersId);
-    const users = await Database.from("users").whereIn("id", usersId);
+    const userIds = trustedData.users;
+    const task = {
+      title: trustedData.title,
+      description: trustedData.description,
+    };
 
     try {
-      const task = {
-        title: trustedData.title,
-        description: trustedData.description,
-        status: trustedData.status,
-        user_id: trustedData.user_id,
-      };
       const newTask = await Task.create(task);
-      console.log(newTask);
-      await newTask.related("manyUsers").saveMany(users);
+      await newTask.related("users").attach(userIds)
 
-      return response.ok(task);
+      for (let i = 0; i < userIds.length; i++){
+        await Database.from('task_user')
+          .where('task_id', newTask.id)
+          .where('user_id', userIds[i])
+          .update({status: TaskStatus.EN_COURS})
+      }
+
+      return response.ok(newTask);
+
     } catch (error) {
       return response.badRequest({ error: error.messages || error });
     }
@@ -35,27 +39,25 @@ export default class TasksController {
   public async index({ params, response }: HttpContextContract) {
     const paramId = params.id;
 
-    const tasks = await Database.from("tasks")
-      .join("users", "tasks.user_id", "users.id")
-      .where("users.id", paramId)
+    const tasks = await Database.from('tasks')
+      .join('task_user', 'task_user.task_id', 'tasks.id')
+      .where('task_user.user_id', paramId)
       .select([
-        "tasks.id",
-        "tasks.title",
-        "tasks.description",
-        "tasks.status",
-        "name as username",
-      ]);
+        'tasks.*',
+        'status'
+      ])
     return response.ok(tasks);
   }
 
   public async getTasks({ response }: HttpContextContract) {
-    const tasks = await Database.from("tasks")
-      .join("users", "tasks.user_id", "users.id")
+    const tasks = await Database.from("task_user")
+      .join("users", "task_user.user_id", "users.id")
+      .join("tasks", "task_user.task_id", "tasks.id")
       .select([
         "tasks.id",
         "tasks.title",
         "tasks.description",
-        "tasks.status",
+        "status",
         "users.name as username",
       ]);
     return response.ok(tasks);

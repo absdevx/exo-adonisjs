@@ -51,7 +51,7 @@ utilisateur spécifique en utilisant son identifiant. */
 
 Route.get("/users/:id", "UsersController.show");
 
-Route.get("/tasks/:id/user", "TasksController.getUserByTask");
+// Route.get("/tasks/:id/user", "TasksController.getUserByTask");
 /*  Récupère l'utilisateur attribué à une tâche 
 spécifique en utilisant l'identifiant de la tâche. */
 
