@@ -25,7 +25,7 @@ Route.get('/', async ({ view }) => {
   return view.render('blog/index')
 })*/
 
-const API_PREFIX = "/api/v1"
+const API_PREFIX = "";
 
 Route.group(() => {
   Route.post("/users", "UsersController.store");
@@ -38,8 +38,7 @@ Route.group(() => {
   // Supprime le User avec l'ID en paramètre
   Route.get("/users/:id", "UsersController.show");
   // Affiche un User à l'aide de son ID
-}).prefix(API_PREFIX)
-
+});
 
 Route.group(() => {
   Route.get("/tasks", "TasksController.getTasks");
@@ -56,4 +55,4 @@ Route.group(() => {
 
   Route.get("/tasks/user/:id", "TasksController.index");
   /*  Récupère toutes les Task attribuées à un User spécifique en utilisant son identifiant. */
-}).prefix(API_PREFIX)
+});
