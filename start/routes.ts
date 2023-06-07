@@ -26,43 +26,30 @@ Route.get('/', async ({ view }) => {
 })*/
 
 Route.post("/users", "UsersController.store");
+/* Crée un nouveau User */
 Route.get("/users", "UsersController.index");
+// Listing des Users disponibles
 
 Route.post("/tasks", "TasksController.store");
-/* Récupère toutes les tâches. */
-
-Route.get("/tasks", "TasksController.getTasks");
-// AAAAasasasa
+/* Crée un nouvel Tasks */
 
 Route.patch("/tasks", "TasksController.update");
-/* Met à jour le model Task avec les paramétres fournies */
+/* Met à jour le Task avec les paramétres fournies */
 
 Route.delete("/tasks/:id", "TasksController.destroy");
-/* Supprime le model Task en paramétre en utitisant l'ID fournie */
+/* Supprime le Task en paramétre en utitisant l'ID fournie */
 
 Route.patch("/users", "UsersController.update");
-// Met à jour le model User en paramétre
+// Met à jour le User avec les paramétres fournies
 
 Route.delete("/users/:id", "UsersController.destroy");
+// Supprime le User avec l'ID en paramètre
 
 Route.get("/tasks/user/:id", "TasksController.index");
-/*  Récupère toutes les tâches attribuées à un 
-utilisateur spécifique en utilisant son identifiant. */
+/*  Récupère toutes les Task attribuées à un 
+User spécifique en utilisant son identifiant. */
 
 Route.get("/users/:id", "UsersController.show");
-
-// Route.get("/tasks/:id/user", "TasksController.getUserByTask");
-/*  Récupère l'utilisateur attribué à une tâche 
-spécifique en utilisant l'identifiant de la tâche. */
-
-/* Route.post("/tttt", async () => {
-  const user = await User.findOrFail(1);
-  return user;
-
-  await user.related("tasks").create({
-    title: "Related task to user 1",
-    description: "Related desscription",
-  });
-  return user;
-});
- */
+/*
+Affiche un User à l'aide de son ID
+*/

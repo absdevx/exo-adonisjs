@@ -10,8 +10,10 @@ import {
 
 export default class TasksController {
   public async store({ request, response }: HttpContextContract) {
-    const trustedData = await request.validate(TaskValidator);
+    /* Crée un nouvel Task avec les paramètres fournies:
+     */
 
+    const trustedData = await request.validate(TaskValidator);
     const userIds = trustedData.users;
     const task = {
       title: trustedData.title,
@@ -20,36 +22,35 @@ export default class TasksController {
 
     try {
       const newTask = await Task.create(task);
-      await newTask.related("users").attach(userIds)
+      await newTask.related("users").attach(userIds);
 
-      for (let i = 0; i < userIds.length; i++){
-        await Database.from('task_user')
-          .where('task_id', newTask.id)
-          .where('user_id', userIds[i])
-          .update({status: TaskStatus.EN_COURS})
+      for (let i = 0; i < userIds.length; i++) {
+        await Database.from("task_user")
+          .where("task_id", newTask.id)
+          .where("user_id", userIds[i])
+          .update({ status: TaskStatus.EN_COURS });
       }
 
       return response.ok(newTask);
-
     } catch (error) {
       return response.badRequest({ error: error.messages || error });
     }
   }
 
   public async index({ params, response }: HttpContextContract) {
+    /*  Récupère toutes les Task attribuées à un User spécifique en utilisant son identifiant. */
     const paramId = params.id;
 
-    const tasks = await Database.from('tasks')
-      .join('task_user', 'task_user.task_id', 'tasks.id')
-      .where('task_user.user_id', paramId)
-      .select([
-        'tasks.*',
-        'status'
-      ])
+    const tasks = await Database.from("tasks")
+      .join("task_user", "task_user.task_id", "tasks.id")
+      .where("task_user.user_id", paramId)
+      .select(["tasks.*", "status"]);
     return response.ok(tasks);
   }
 
   public async getTasks({ response }: HttpContextContract) {
+    /* Récupère toutes les Tasks */
+
     const tasks = await Database.from("task_user")
       .join("users", "task_user.user_id", "users.id")
       .join("tasks", "task_user.task_id", "tasks.id")
@@ -64,6 +65,8 @@ export default class TasksController {
   }
 
   public async update({ request, response }: HttpContextContract) {
+    /* Met à jour le Task avec les paramétres fournies */
+
     const trustedData = await request.validate(TaskUpdateValidator);
     try {
       await Task.query().where("id", trustedData.id).update(trustedData);
@@ -74,6 +77,8 @@ export default class TasksController {
   }
 
   public async destroy({ params, response }: HttpContextContract) {
+    /* Supprime le Task en paramétre en utitisant l'ID fournie */
+
     const paramId = params.id;
     try {
       await Task.query().where("id", paramId).delete();
@@ -83,12 +88,4 @@ export default class TasksController {
     }
   }
 
-  public async getUserByTask({ params, response }: HttpContextContract) {
-    const paramId = params.id;
-    const task = await User.query()
-      .join("tasks", "tasks.user_id", "users.id")
-      .where("tasks.id", paramId)
-      .select();
-    return response.ok(task);
-  }
 }

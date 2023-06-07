@@ -17,26 +17,29 @@ const USER_PER_PAGE = 2;
 
 export default class UsersController {
   public async index({ request, response }: HttpContextContract) {
-    const page = request.input("page", 1);
+    // Listing des Users disponibles avec pagination avec un nombre d'elements par page selon USER_PER_PAGE
 
+    const page = request.input("page", 1);
     const pagination = await User.query()
       .select(["id", "name", "email"])
       .paginate(page, USER_PER_PAGE);
+
     return response.json(pagination);
   }
 
   public async store({ request, response }: HttpContextContract) {
+    /* Crée un nouveau User */
     const trustedData = await request.validate(UserStoreValidator);
     try {
       const ret = await User.create(trustedData);
-
-      return response.status(201).json(ret);
+      return response.ok(ret);
     } catch (error) {
-      return response.status(400).json({ error: error.messages || error });
+      return response.badRequest({ error: error.messages || error });
     }
   }
 
   public async update({ request, response }: HttpContextContract) {
+    // Met à jour le User avec les paramétres fournies
     const trustedData = await request.validate(UserUpdateValidator);
     try {
       await User.query().where("id", trustedData.id).update(trustedData);
@@ -47,6 +50,7 @@ export default class UsersController {
   }
 
   public async show({ params, response }: HttpContextContract) {
+    /* Affiche un User à l'aide de son ID */
     const paramId = params.id;
 
     try {
@@ -62,6 +66,8 @@ export default class UsersController {
   }
 
   public async destroy({ params, response }: HttpContextContract) {
+    // Supprime le User avec l'ID en paramètre
+
     const trustedData = await params.id;
     try {
       await User.query().where("id", trustedData).delete();
