@@ -36,6 +36,8 @@ Route.group(() => {
 Route.group(() => {
   Route.get("/tasks", "TasksController.index");
   // Listing des tasks
+  Route.get("/tasks/:id", "TasksController.show");
+  // Show Task
   Route.post("/tasks", "TasksController.store");
   /* Crée un nouvel Tasks */
   Route.patch("/tasks/:id", "TasksController.update");

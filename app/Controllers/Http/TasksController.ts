@@ -21,7 +21,7 @@ export default class TasksController {
     try {
       const newTask = await Task.create(task);
       await newTask.related("users").attach(users);
-      return response.ok(newTask);
+      return response.created(newTask);
     } catch (error) {
       return response.badRequest({ error: error.messages || error });
     }
@@ -30,11 +30,16 @@ export default class TasksController {
   TODO: "Recuperer toute les tâches avec le nombre d'utilisateur pour chaque tâche";
   public async getTasksByUser({ params, response }: HttpContextContract) {
     const { id } = await IDValidator.validate(params, "users");
+    /* const user = await User.findOrFail(id)
+    const tasks = user.related("tasks").query().select([
+      'tasks.*'
+    ]) */
+    // const tasks = (await User.findOrFail(id)).related('tasks').query().select()
+    const tasks = await User.query()
+      .withCount("tasks")
+      .preload("tasks")
+      .where("id", id);
 
-    const tasks = await Database.from("tasks")
-      .join("task_user", "task_user.task_id", "tasks.id")
-      .where("task_user.user_id", id)
-      .select(["tasks.*", "status"]);
     return response.ok(tasks);
   }
   /* Récupère toutes les Tasks */
@@ -54,6 +59,12 @@ export default class TasksController {
     return response.ok(tasks);
   }
 
+  public async show({ params, response }: HttpContextContract) {
+    const { id } = await IDValidator.validate(params, 'tasks')
+    const taskWithUsers = await Task.query().where('id', id).preload("users")
+    return response.ok(taskWithUsers)
+  }
+
   /* Met à jour le Task avec les paramétres fournies */
   public async update({ params, request, response }: HttpContextContract) {
     TODO: "recuperer l'id autrement, ajouter un custom validateur pour les ids";
@@ -63,30 +74,22 @@ export default class TasksController {
       TaskUpdateValidator
     );
     try {
-      // const task = await Task.findOrFail(trustedData.id);
-      const task = await Task.query().where('id', id).preload('users').firstOrFail()
-      await task.merge({
-        title: title,
-        description: description,
-      }).save();
+      const task = await Task.query().where("id", id).firstOrFail();
+      await task
+        .merge({
+          title: title,
+          description: description,
+        })
+        .save();
+      console.log("task updated: %s", task.id);
 
-      // const oldUsers = task.related('users').query()
-      const pivotData = users.reduce((data, userId) => {
-        data[userId] = {
-          status: status,
-        };
-        return data;
-      }, {});
+      await task.related("users").sync(users, false);
+      console.log("Adding users:%s to task:%s", users, task.id);
 
-      await task.related("users").sync(pivotData, false);
+      await task.related("users").pivotQuery().update({ status: status });
+      console.log("Updating status' task");
 
-      /* await task.related("users").attach(users);
-        await task
-          .related("users")
-          .pivotQuery()
-          .whereIn("user_id", users)
-          .update({ status: status }); */
-      return response.ok(task);
+      return response.noContent()
     } catch (error) {
       return response.badRequest("Failed to update your task");
     }
@@ -97,7 +100,7 @@ export default class TasksController {
 
     try {
       await Task.query().where("id", id).delete();
-      return response.ok({ message: "Task delete successfully" });
+      return response.noContent();
     } catch (error) {
       return response.badRequest(error.messages || error);
     }

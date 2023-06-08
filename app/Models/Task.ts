@@ -19,8 +19,8 @@ export default class Task extends BaseModel {
 
   @manyToMany(() => User, {
     pivotTable: "task_user",
-    pivotForeignKey: "task_id", // Clé étrangère vers le modèle User
-    pivotRelatedForeignKey: "user_id", // Clé étrangère vers le modèle Role
+    pivotForeignKey: "task_id",
+    pivotRelatedForeignKey: "user_id",
     pivotColumns: ["status"],
   })
   public users: ManyToMany<typeof User>;

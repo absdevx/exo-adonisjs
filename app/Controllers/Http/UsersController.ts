@@ -7,14 +7,6 @@ import {
   UserUpdateValidator,
 } from "App/Validators/UserValidator";
 
-/*
-
-Route.post('/users', 'UsersController.create')
-Route.get('/users', 'UsersController.index')
-Route.post('/users/:id', 'UsersController.show')
-
-*/
-
 const USER_PER_PAGE = 2;
 
 export default class UsersController {
@@ -22,13 +14,12 @@ export default class UsersController {
     // Listing des Users disponibles avec pagination avec un nombre d'elements par page selon USER_PER_PAGE
 
     const page = request.input("page", 1);
-    const max_of_limit = await User.query().count('id')
+    const max_of_limit = (await User.query()).length
 
     let limit = request.input("limit", USER_PER_PAGE)  
     if (limit > max_of_limit) limit = max_of_limit
-    // Quand la limite de 
-    
-    return limit
+    // Quand la limite fournie est plus grande que celle disponible, renvoyons les elements disponibles
+    // console.log(limit, max_of_limit)
 
     const pagination = await User.query()
       .select(["id", "name", "email"])
@@ -41,8 +32,8 @@ export default class UsersController {
     /* Crée un nouveau User */
     const trustedData = await request.validate(UserStoreValidator);
     try {
-      const ret = await User.create(trustedData);
-      return response.ok(ret);
+      const user = await User.create(trustedData);
+      return response.ok(user);
     } catch (error) {
       return response.badRequest({ error: error.messages || error });
     }
@@ -53,7 +44,7 @@ export default class UsersController {
     const {id} = await IDValidator.validate(params, "users");
     const trustedData = await request.validate(UserUpdateValidator)
     try {
-      await User.query().where("id", id).update(trustedData);
+      (await User.findOrFail(id)).delete()
       return response.ok(trustedData);
     } catch (error) {
       return response.badRequest("Failed to update user");
@@ -82,7 +73,7 @@ export default class UsersController {
     const trustedData = await params.id;
     try {
       await Database.from('users').where('id', trustedData).delete()
-      return response.ok("User deleted successfully");
+      return response.noContent();
     } catch (error) {
       return response.badRequest({
         error: "Failed to delete user",
