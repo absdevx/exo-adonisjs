@@ -35,15 +35,17 @@ Route.group(() => {
 
 Route.group(() => {
   Route.get("/tasks", "TasksController.index");
-  // Listing des tasks
-  Route.get("/tasks/:id", "TasksController.show");
-  // Show Task
   Route.post("/tasks", "TasksController.store");
-  /* Crée un nouvel Tasks */
+  Route.get("/tasks/:id", "TasksController.show");
   Route.patch("/tasks/:id", "TasksController.update");
-  /* Met à jour le Task avec les paramétres fournies */
   Route.delete("/tasks/:id", "TasksController.destroy");
-  /* Supprime le Task en paramétre en utitisant l'ID fournie */
   Route.get("/tasks/user/:id", "TasksController.getTasksByUser");
-  /*  Récupère toutes les Task attribuées à un User spécifique en utilisant son identifiant. */
 });
+
+Route.group(() => {
+  Route.post("/categories", "CategoryController.store");
+  Route.get("/categories", "CategoryController.index");
+  Route.patch("/categories/:id", "CategoryController.update");
+  Route.delete("/categories/:id", "CategoryController.destroy");
+  Route.get("/categories/:id", "CategoryController.show");
+})

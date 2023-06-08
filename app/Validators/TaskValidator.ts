@@ -6,30 +6,31 @@ export class TaskValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public schema = schema.create({
-    title: schema.string([
+    title: schema.string({ trim: true }, [
       rules.required(),
       rules.unique({ table: "tasks", column: "title" }),
     ]),
-    description: schema.string([rules.maxLength(200)]),
+    description: schema.string({ trim: true, escape: true }, [rules.maxLength(200)]),
     users: schema
       .array()
       .members(schema.string([rules.exists({ table: "users", column: "id" })])),
   });
 
-  public messages: CustomMessages = {
+ /*  public messages = {
     "title.unique": "Titre invalide",
     "title.required": "Titre invalide",
-    "description.": "Description invalide",
-    "users.*": "ID utilisateur incorrect",
-  };
+    "description.maxLength": "Description trop long",
+    "users.*.exists": "ID utilisateur incorrect",
+  }; */
 }
+
 
 export class TaskUpdateValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public schema = schema.create({
     title: schema.string.optional(),
-    status: schema.enum(TaskStatusList),
+    status: schema.enum.optional(TaskStatusList),
     description: schema.string.optional(),
     users: schema
       .array()
