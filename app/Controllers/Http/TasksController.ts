@@ -61,7 +61,7 @@ export default class TasksController {
     }
   }
 
-  public async delete({ params, response, request }: HttpContextContract) {
+  public async delete({ response, request }: HttpContextContract) {
     const paramId = (await request.validate(TaskUpdateValidator)).id;
     try {
       await Task.query().where("id", paramId).delete();
