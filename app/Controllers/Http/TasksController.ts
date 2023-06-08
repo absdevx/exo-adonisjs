@@ -53,9 +53,14 @@ export default class TasksController {
     }
   }
 
+<<<<<<< HEAD
   public async show({ params, response }: HttpContextContract) {
     const { id } = await IDValidator.validate(params, "tasks");
 
+=======
+  public async delete({ response, request }: HttpContextContract) {
+    const paramId = (await request.validate(TaskUpdateValidator)).id;
+>>>>>>> develop
     try {
       const taskWithUsers = await Task.query().where("id", id).preload("users");
       return response.ok(taskWithUsers);
