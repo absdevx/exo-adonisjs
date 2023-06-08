@@ -25,32 +25,27 @@ Route.get('/', async ({ view }) => {
   return view.render('blog/index')
 })*/
 
-Route.post("/users", "UsersController.store");
-Route.get("/users", "UsersController.index");
+Route.group(() => {
+  Route.post("/users", "UsersController.store");
+  Route.get("/users", "UsersController.index");
+  Route.patch("/users/:id", "UsersController.update");
+  Route.delete("/users/:id", "UsersController.destroy");
+  Route.get("/users/:id", "UsersController.show");
+});
 
-Route.post("/tasks", "TasksController.store");
-/* Récupère toutes les tâches. */
+Route.group(() => {
+  Route.get("/tasks", "TasksController.index");
+  Route.post("/tasks", "TasksController.store");
+  Route.get("/tasks/:id", "TasksController.show");
+  Route.patch("/tasks/:id", "TasksController.update");
+  Route.delete("/tasks/:id", "TasksController.destroy");
+  Route.get("/tasks/user/:id", "TasksController.getTasksByUser");
+});
 
-Route.get("/tasks/user/:id", "TasksController.index");
-/*  Récupère toutes les tâches attribuées à un 
-utilisateur spécifique en utilisant son identifiant. */
-
-Route.get("/users/:id", "UsersController.show");
-
-Route.get("/tasks", "TasksController.getTasks");
-// AAAAasasasa
-
-Route.get("/tasks/:id/user", "TasksController.getUserByTask");
-/*  Récupère l'utilisateur attribué à une tâche 
-spécifique en utilisant l'identifiant de la tâche. */
-
-Route.patch("/tasks", "TasksController.update");
-/* Met à jour le model Task avec les paramétres fournies */
-
-Route.delete("/tasks", "TasksController.delete");
-/* Supprime le model Task en paramétre en utitisant l'ID fournie */
-
-Route.patch("/users", "UsersController.update");
-// Met à jour le model User en paramétre
-
-Route.delete("/users", "UsersController.delete");
+Route.group(() => {
+  Route.post("/categories", "CategoryController.store");
+  Route.get("/categories", "CategoryController.index");
+  Route.patch("/categories/:id", "CategoryController.update");
+  Route.delete("/categories/:id", "CategoryController.destroy");
+  Route.get("/categories/:id", "CategoryController.show");
+})

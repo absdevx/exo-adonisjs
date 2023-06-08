@@ -1,10 +1,15 @@
 import { DateTime } from "luxon";
-import { BaseModel, HasMany, column, hasMany } from "@ioc:Adonis/Lucid/Orm";
+import {
+  BaseModel,
+  ManyToMany,
+  column,
+  manyToMany,
+} from "@ioc:Adonis/Lucid/Orm";
 import Task from "App/Models/Task";
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
-  public id: number;
+  public id: string;
 
   @column()
   public name: string;
@@ -12,12 +17,28 @@ export default class User extends BaseModel {
   @column()
   public email: string;
 
-  @hasMany(() => Task)
-  public tasks: HasMany<typeof Task>;
+  /* @belongsToMany(() => Task)
+    public belongsToManyTasks: HasMany<typeof Task> */
 
-  @column.dateTime({ autoCreate: true })
+  @manyToMany(() => Task, {
+    pivotTable: "task_user",
+    pivotForeignKey: "user_id",
+    pivotRelatedForeignKey: "task_id",
+    pivotColumns: ["status"],
+  })
+  public tasks: ManyToMany<typeof Task>;
+
+  @column.dateTime({ autoCreate: true, serializeAs: null })
   public createdAt: DateTime;
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, serializeAs: null })
   public updatedAt: DateTime;
+
+  // public serializeExtras = true;
+
+  public serializeExtras() {
+    return {
+      tasks_count: this.$extras.tasks_count,
+    };
+  }
 }

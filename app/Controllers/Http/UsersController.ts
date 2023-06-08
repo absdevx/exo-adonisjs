@@ -1,72 +1,103 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import User from "App/Models/User";
+import { IDValidator } from "App/Validators/IDValidator";
 import {
   UserStoreValidator,
   UserUpdateValidator,
 } from "App/Validators/UserValidator";
 
-/*
-
-Route.post('/users', 'UsersController.create')
-Route.get('/users', 'UsersController.index')
-Route.post('/users/:id', 'UsersController.show')
-
-*/
-
 const USER_PER_PAGE = 2;
 
 export default class UsersController {
+  // Listing des Users disponibles avec pagination avec
+  // un nombre d'elements par page selon USER_PER_PAGE
   public async index({ request, response }: HttpContextContract) {
     const page = request.input("page", 1);
+    const max_of_limit = (await User.query()).length;
 
-    const pagination = await User.query()
-      .select(["id", "name", "email"])
-      .paginate(page, USER_PER_PAGE);
-    return response.json(pagination);
+    let limit = request.input("limit", USER_PER_PAGE);
+    if (limit > max_of_limit) limit = max_of_limit;
+
+    try {
+      const pagination = await User.query()
+        .withCount("tasks")
+        .select(["users.*"])
+        .paginate(page, limit);
+      return response.ok({
+        message: "Data retrieved successfully",
+        pagination,
+      });
+    } catch (error) {
+      return response.badRequest({
+        message: "Failed to retrieved data",
+        error: error.messages || error,
+      });
+    }
   }
 
+  /* Crée un nouveau User */
   public async store({ request, response }: HttpContextContract) {
+    const trustedData = await request.validate(UserStoreValidator);
     try {
-      const trustedData = await request.validate(UserStoreValidator);
-      const ret = await User.create(trustedData);
-      return response.status(201).json(ret);
+      const user = await User.create(trustedData);
+      return response.created({ message: "User created successfully", user });
     } catch (error) {
-      return response.status(400).json({ error: error.messages || error });
+      return response.badRequest({
+        message: "Failed to create user",
+        error: error.messages || error,
+      });
     }
   }
 
-  public async update({ request, response }: HttpContextContract) {
+  // Met à jour le User avec les paramétres fournies
+  public async update({ request, params, response }: HttpContextContract) {
+    const { id } = await IDValidator.validate(params, "users");
     const trustedData = await request.validate(UserUpdateValidator);
     try {
-      await User.query().where("id", trustedData.id).update(trustedData);
-      return response.ok(trustedData);
+      await User.query().where("id", id).update(trustedData);
+      return response.ok({
+        message: "User updated successfully",
+        data: trustedData,
+      });
     } catch (error) {
-      return response.badRequest("Failed to update user");
+      return response.badRequest({
+        message: "Failed to update user",
+        error: error.message || error,
+      });
     }
   }
 
+  /* Affiche un User à l'aide de son ID */
   public async show({ params, response }: HttpContextContract) {
-    const paramId = params.id;
+    const { id } = await IDValidator.validate(params, "users");
 
     try {
-      const data = await User.query()
-        .where("id", paramId)
-        .preload("tasks")
-        .select();
+      const data = await User.query().where("id", id).preload("tasks").select();
 
-      return response.ok(data);
+      return response.ok({
+        message: "User updated successfully",
+        data: data,
+      });
     } catch (error) {
-      return response.badRequest({ error: error.messages || error });
+      return response.badRequest({
+        message: "Failed to show user data",
+        error: error.message || error,
+      });
     }
   }
 
-  public async delete({ request, response }: HttpContextContract) {
-    const trustedData = await request.validate(UserUpdateValidator);
+  // Supprime le User avec l'ID en paramètre
+  public async destroy({ params, response }: HttpContextContract) {
+    const { id } = await IDValidator.validate(params, "users");
+
     try {
-      await User.query().where("id", trustedData.id).delete();
-      return response.ok("User deleted successfully");
+      await User.query().where("id", id).delete();
+      return response.noContent();
     } catch (error) {
-      return response.badRequest("Failed to delete user");
+      return response.badRequest({
+        error: "Failed to delete user",
+        data: error.message || error,
+      });
     }
   }
 }

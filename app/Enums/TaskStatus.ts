@@ -11,7 +11,7 @@ export const TaskStatusList = [
   TaskStatus.TERMINE,
 ];
 
-export const TaskStatusLabels = {
+export const TaskStatusLabels: { [key in TaskStatus]: string } = {
   [TaskStatus.EN_COURS]: "En cours",
   [TaskStatus.TERMINE]: "Terminé",
   [TaskStatus.ANNULE]: "Annulé",
