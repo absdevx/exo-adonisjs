@@ -13,11 +13,17 @@ export default class Category extends BaseModel {
   public description: string;
 
   @hasMany(() => Task)
-    public tasks: HasMany<typeof Task>
+  public tasks: HasMany<typeof Task>;
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, serializeAs: null })
   public createdAt: DateTime;
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, serializeAs: null, autoUpdate: true })
   public updatedAt: DateTime;
+
+  public serializeExtras() {
+    return {
+      tasks_count: this.$extras.users_count,
+    };
+  }
 }

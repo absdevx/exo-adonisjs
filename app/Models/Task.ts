@@ -20,8 +20,11 @@ export default class Task extends BaseModel {
   @column()
   public description: string;
 
+  @column()
+  public categoryId: string;
+
   @belongsTo(() => Category)
-  public category_id: BelongsTo<typeof Category>;
+  public categories: BelongsTo<typeof Category>;
 
   @manyToMany(() => User, {
     pivotTable: "task_user",
@@ -40,6 +43,7 @@ export default class Task extends BaseModel {
   public serializeExtras() {
     return {
       users_count: this.$extras.users_count,
+      categories_count: this.$extras.categories_count
     };
   }
 }

@@ -13,6 +13,8 @@ export default class UsersController {
   // un nombre d'elements par page selon USER_PER_PAGE
   public async index({ request, response }: HttpContextContract) {
     const page = request.input("page", 1);
+
+    return await User.query();
     const max_of_limit = (await User.query()).length;
 
     let limit = request.input("limit", USER_PER_PAGE);
@@ -53,6 +55,7 @@ export default class UsersController {
   public async update({ request, params, response }: HttpContextContract) {
     const { id } = await IDValidator.validate(params, "users");
     const trustedData = await request.validate(UserUpdateValidator);
+
     try {
       await User.query().where("id", id).update(trustedData);
       return response.ok({

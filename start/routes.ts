@@ -43,8 +43,8 @@ Route.group(() => {
 });
 
 Route.group(() => {
-  Route.post("/categories", "CategoryController.store");
   Route.get("/categories", "CategoryController.index");
+  Route.post("/categories", "CategoryController.store");
   Route.patch("/categories/:id", "CategoryController.update");
   Route.delete("/categories/:id", "CategoryController.destroy");
   Route.get("/categories/:id", "CategoryController.show");
