@@ -1,71 +1,66 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import User from "App/Models/User";
 import { IDValidator } from "App/Validators/IDValidator";
-import { UserQueryValidator } from "App/Validators/QueryValidator";
 import {
   UserStoreValidator,
   UserUpdateValidator,
 } from "App/Validators/UserValidator";
 
-const USERS_PER_PAGE = 2;
 
 export default class UsersController {
   // Listing des Users disponibles avec pagination avec
   // un nombre d'elements par page selon USER_PER_PAGE
   public async index({ request, response }: HttpContextContract) {
-    const page = request.input("page", 1);
-
-    const max_of_limit = (await User.query()).length;
-
-    let limit = request.input("limit", USERS_PER_PAGE);
-    if (limit > max_of_limit) limit = max_of_limit;
+    const { page = 1, limit = 10 } = request.qs()
 
     try {
       const pagination = await User.query()
         .withCount("tasks")
         .select(["users.*"])
         .paginate(page, limit);
+      
       return response.ok({
         message: "Data retrieved successfully",
-        pagination,
+        meta: pagination.getMeta(),
+        users: pagination.all()
       });
     } catch (error) {
       return response.badRequest({
         message: "Failed to retrieved data",
-        error: error.messages || error,
+        error: error.message || error,
       });
     }
   }
 
+  /* 
+    Permet aux utilisateurs de 
+    rechercher des utilisateurs en fonction d'un terme de recherche spécifié 
+    dans le paramètre "query". Les résultats renvoyés doivent correspondre au om ou à l'adresse e-mail des utilisateurs.
+  */
   public async search({ request, response }: HttpContextContract) {
-    const query = request.input("query", null);
+    const {page, limit, query} = request.qs()
     if (!query) return;
-
-    const page: number = request.input("page", 1);
-    const maxLimit = (await User.query()).length;
-
-    let limit = request.input("limit", USERS_PER_PAGE);
-    if (limit > maxLimit) limit = maxLimit;
 
     try {
       const users = await User.query()
         .whereILike("name", `%${query}%`)
         .orWhereILike("email", `%${query}%`)
         .paginate(page, limit);
-      
+
       return response.ok({
         message: "Search finished successfully",
-        data: users,
+        meta: users.getMeta(),
+        users: users.all(),
       });
     } catch (error) {
       return response.badRequest({
         message: "Failed to search users",
-        error: error.messages || error,
+        error: error.message || error,
       });
     }
   }
 
-  /* Crée un nouveau User */
+  /* Crée un nouveau User avec les paramètres de request */
   public async store({ request, response }: HttpContextContract) {
     const trustedData = await request.validate(UserStoreValidator);
     try {
@@ -74,7 +69,7 @@ export default class UsersController {
     } catch (error) {
       return response.badRequest({
         message: "Failed to create user",
-        error: error.messages || error,
+        error: error.message || error,
       });
     }
   }
@@ -85,7 +80,10 @@ export default class UsersController {
     const trustedData = await request.validate(UserUpdateValidator);
 
     try {
-      await (await User.findOrFail(id)).merge({ ...trustedData }).save();
+      
+      const user = await User.findOrFail(id);
+      await user.merge(trustedData).save();
+
       return response.ok({
         message: "User updated successfully",
         data: trustedData,
@@ -107,7 +105,7 @@ export default class UsersController {
 
       return response.ok({
         message: "User updated successfully",
-        data: data,
+        user: data,
       });
     } catch (error) {
       return response.badRequest({
@@ -122,8 +120,10 @@ export default class UsersController {
     const { id } = await IDValidator.validate(params, "users");
 
     try {
-      await User.query().where("id", id).delete();
+      const user = await User.findOrFail(id)
+      await user.delete();
       return response.noContent();
+
     } catch (error) {
       return response.badRequest({
         error: "Failed to delete user",

@@ -40,8 +40,4 @@ git commit -am "$commit"
 # Publish the feature branch using Git Flow
 git flow feature publish "$FEATURE_NAME"
 
-# Publish the feature branch using Git Flow
-git flow feature track origin "$FEATURE_NAME"
-
-
 echo "Feature '$FEATURE_NAME' published successfully."

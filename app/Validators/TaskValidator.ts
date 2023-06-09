@@ -21,12 +21,12 @@ export class TaskValidator {
       .members(schema.string([rules.exists({ table: "users", column: "id" })])),
   });
 
-  /*  public messages = {
+   public messages = {
     "title.unique": "Titre invalide",
     "title.required": "Titre invalide",
     "description.maxLength": "Description trop long",
     "users.*.exists": "ID utilisateur incorrect",
-  }; */
+  };
 }
 
 export class TaskUpdateValidator {

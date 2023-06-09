@@ -6,24 +6,20 @@ import {
 } from "App/Validators/CategoryValidator";
 import { IDValidator } from "App/Validators/IDValidator";
 
-const CATEGORIES_PER_PAGE = 3;
-
 export default class CategoryController {
   public async index({ request, response }: HttpContextContract) {
-    const page: number = request.input("page", 1);
-    let limit: number = request.input("limit", CATEGORIES_PER_PAGE);
-
-    const max_of_limit = (await Category.query()).length;
-    if (limit > max_of_limit) limit = max_of_limit;
+    const { page = 1, limit = 10 } = request.qs();
 
     try {
       const pagination = await Category.query()
         .withCount("tasks")
         .select(["categories.*"])
         .paginate(page, limit);
+
       return response.ok({
         message: "Data retrieved successfully",
-        pagination,
+        meta: pagination.getMeta(),
+        categories: pagination.all(),
       });
     } catch (error) {
       return response.badRequest({
@@ -52,10 +48,11 @@ export default class CategoryController {
     const trustedData = await request.validate(CategoryUpdateValidator);
 
     try {
-      await (await Category.findOrFail(id)).merge(trustedData).save();
+      const category = await Category.findOrFail(id)
+      await category.merge(trustedData).save();
+
       return response.ok({
         message: "Category updated successfully",
-        data: trustedData,
       });
     } catch (error) {
       return response.badRequest({
@@ -81,12 +78,30 @@ export default class CategoryController {
       });
     }
   }
+
+  // Supprime le Category donnée en utilisant l'ID fournie
+  // Cette fonction vérifira s'il y a des Task associés à celle-ci,
+  // Si oui, elle retourne une erreur sans supprimer quelque chose, sinon
+  // elle supprime simplement 
   public async destroy({ params, response }: HttpContextContract) {
     const { id } = await IDValidator.validate(params, "categories");
 
     try {
-      await Category.query().where("id", id).delete();
+      const category = await Category.query()
+        .where("id", id)
+        .preload("tasks")
+        .firstOrFail();
+      
+      if (category.tasks.length > 0) {
+        return response.badRequest({
+          message:
+            "Failed to delete this category because it's used by many tasks",
+        });
+      }
+      await category.delete()
+
       return response.noContent();
+
     } catch (error) {
       return response.badRequest({
         error: "Failed to delete category",

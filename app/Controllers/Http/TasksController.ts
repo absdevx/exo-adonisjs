@@ -1,4 +1,5 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import Category from "App/Models/Category";
 import Task from "App/Models/Task";
 import User from "App/Models/User";
 import { IDValidator } from "App/Validators/IDValidator";
@@ -7,81 +8,71 @@ import {
   TaskUpdateValidator,
 } from "App/Validators/TaskValidator";
 
-const TASKS_PER_PAGE = 3;
-
 export default class TasksController {
+
+  /*
+  Renvoie toutes les Tasks qui correspond au texte de recherche.
+  Cette recherche sera faite dans la colonne tasks.title uniquement
+  */
   public async search({ request, response }: HttpContextContract) {
-    const query = request.input("query", null);
+    const { page, limit, query } = request.qs();
     if (!query) return;
-
-    const page: number = request.input("page", 1);
-    const maxLimit = (await Task.query()).length;
-
-    let limit = request.input("limit", TASKS_PER_PAGE);
-    if (limit > maxLimit) limit = maxLimit;
 
     try {
       const tasks = await Task.query()
         .whereILike("title", `%${query}%`)
-        .orWhereILike("description", `%${query}%`)
         .paginate(page, limit);
-      
+
       return response.ok({
         message: "Search finished successfully",
-        data: tasks,
+        meta: tasks.getMeta(),
+        tasks: tasks.all(),
       });
     } catch (error) {
       return response.badRequest({
         message: "Failed to search tasks",
-        error: error.messages || error,
+        error: error.message || error,
       });
     }
   }
-  /* Crée un nouvel Task avec les paramètres fournies: */
+  /* Crée un nouvel Task avec les paramètres fournies */
   public async store({ request, response }: HttpContextContract) {
-    const { users, title, description, categoryId } = await request.validate(
-      TaskValidator
-    );
+    const { users, ...trustedData } = await request.validate(TaskValidator);
 
     try {
-      const newTask = await Task.create({
-        title: title,
-        description: description,
-        categoryId: categoryId,
-      });
+      const newTask = await Task.create(trustedData);
       await newTask.related("users").attach(users);
+
       return response.created({
         message: "Task created successfully",
         data: newTask,
       });
     } catch (error) {
-      return response.badRequest({ error: error.messages || error });
+      return response.badRequest({ error: error.message || error });
     }
   }
-  /*  Récupère toutes les Task attribuées à un User spécifique en utilisant son identifiant. */
-  TODO: "Recuperer toute les tâches avec le nombre d'utilisateur pour chaque tâche";
-  public async getTasksByUser({ params, response }: HttpContextContract) {
-    const { id } = await IDValidator.validate(params, "users");
+  /* Récupère toutes les Tasks disponibles */
+  public async index({ request, response }: HttpContextContract) {
+    const { page = 1, limit = 10 } = request.qs();
+
     try {
-      const tasks = await User.query().where("id", id).preload("tasks");
+      const tasks = await Task.query().withCount("users").paginate(page, limit);
 
-      return response.ok(tasks);
+      return response.ok({
+        message: "Tasks retrieved successfully",
+        meta: tasks.getMeta(),
+        tasks: tasks.all(),
+      });
     } catch (error) {
-      return response.badRequest(error.message || error);
-    }
-  }
-  /* Récupère toutes les Tasks */
-  // "Ajouter la fonction show, recuperer une tâche specific avec les infos des u◘tilisateus assigne";
-  public async index({ response }: HttpContextContract) {
-    try {
-      const tasks = await Task.query().withCount("users").select(["tasks.*"]);
-
-      return response.ok(tasks);
-    } catch (error) {
-      return response.badRequest(error.message || error);
+      return response.badRequest({
+        message: "Failed to fetch tasks",
+        error: error.message || error,
+      });
     }
   }
 
+  /* Renvoie les informations d'une Task: le title, description et le nom de la catégorie
+  */
   public async show({ params, response }: HttpContextContract) {
     const { id } = await IDValidator.validate(params, "tasks");
     try {
@@ -89,13 +80,17 @@ export default class TasksController {
         .where("id", id)
         .preload("users")
         .select();
-      return response.ok({ message: "Task fetched with success", data: tasks });
+      return response.ok({ message: "Task fetched with success", task: tasks });
     } catch (error) {
-      return response.badRequest(error.message || error);
+      return response.badRequest({
+        message: "Failed to fetch user",
+        error: error.message || error,
+      });
     }
   }
 
-  /* Met à jour le Task avec les paramétres fournies */
+  /* Met à jour le Task avec les paramétres fournies
+  */
   public async update({ params, request, response }: HttpContextContract) {
     const { id } = await IDValidator.validate(params, "tasks");
     const { users, ...trustedData } = await request.validate(
@@ -104,15 +99,12 @@ export default class TasksController {
 
     try {
       const task = await Task.query().where("id", id).firstOrFail();
-      await task.merge({ ...trustedData }).save();
-
-      console.log("task updated: %s", task);
+      await task.merge(trustedData).save();
 
       if (users) await task.related("users").sync(users, false);
 
       return response.ok({
         message: "Task updated successfully",
-        data: request.all(),
       });
     } catch (error) {
       return response.badRequest({
@@ -126,10 +118,12 @@ export default class TasksController {
     const { id } = await IDValidator.validate(params, "tasks");
 
     try {
-      await Task.query().where("id", id).delete();
+      const task = await Task.findOrFail(id)
+      await task.delete();
+      
       return response.noContent();
     } catch (error) {
-      return response.badRequest(error.messages || error);
+      return response.badRequest({ message: error.message || error });
     }
   }
 }

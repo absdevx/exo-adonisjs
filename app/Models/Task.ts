@@ -1,12 +1,13 @@
 import { DateTime } from "luxon";
+import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+
 import {
   BaseModel,
-  HasMany,
-  HasOne,
+  BelongsTo,
   ManyToMany,
+  afterFetch,
+  belongsTo,
   column,
-  hasMany,
-  hasOne,
   manyToMany,
 } from "@ioc:Adonis/Lucid/Orm";
 import User from "App/Models/User";
@@ -22,11 +23,13 @@ export default class Task extends BaseModel {
   @column()
   public description: string;
 
-  @column({serializeAs: null})
-  public categoryId: string;
+  @column({ serializeAs: null })
+  public categoryId: string | null;
 
-  @hasOne(() => Category)
-  public categories: HasOne<typeof Category>;
+  @belongsTo(() => Category, {
+    foreignKey: "categoryId",
+  })
+  public category: BelongsTo<typeof Category>;
 
   @manyToMany(() => User, {
     pivotTable: "task_user",
@@ -46,7 +49,17 @@ export default class Task extends BaseModel {
     return {
       users_count: this.$extras.users_count,
       categories_count: this.$extras.categories_count,
-      status: this.$extras.pivot_status
+      category_name: this.$extras.category_name,
+      status: this.$extras.pivot_status,
     };
+  }
+
+  @afterFetch()
+  public static async afterFetchCategory(tasks: Task[]) {
+    return Promise.all(
+      tasks.map(async (task) => {
+        task.$extras.category_name = (await Category.findOrFail(task.categoryId)).name
+      })
+    )
   }
 }
