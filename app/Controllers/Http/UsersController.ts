@@ -37,7 +37,6 @@ export default class UsersController {
   */
   public async search({ request, response }: HttpContextContract) {
     const { page, limit, query } = request.qs();
-    if (!query) return;
 
     try {
       const users = await User.query()
@@ -63,7 +62,7 @@ export default class UsersController {
     const trustedData = await request.validate(UserStoreValidator);
     try {
       const user = await User.create(trustedData);
-      return response.created({ message: "User created successfully", user });
+      return response.created({ message: "User created successfully", user: user });
     } catch (error) {
       return response.badRequest({
         message: "Failed to create user",
@@ -83,7 +82,6 @@ export default class UsersController {
 
       return response.ok({
         message: "User updated successfully",
-        data: trustedData,
       });
     } catch (error) {
       return response.badRequest({

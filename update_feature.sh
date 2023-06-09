@@ -31,7 +31,6 @@ if [ -z "$commit" ] || [ -z "$FEATURE_NAME" ]; then
   exit 1
 fi
 
-
 git add "."
 
 # Commit the changes with the provided message

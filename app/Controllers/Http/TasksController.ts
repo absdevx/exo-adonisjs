@@ -13,8 +13,7 @@ export default class TasksController {
   Cette recherche sera faite dans la colonne tasks.title uniquement
   */
   public async search({ request, response }: HttpContextContract) {
-    const { page, limit, query } = request.qs();
-    if (!query) return;
+    const { page=1, limit=10, query } = request.qs();
 
     try {
       const tasks = await Task.query()
