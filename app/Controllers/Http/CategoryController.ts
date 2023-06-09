@@ -52,7 +52,7 @@ export default class CategoryController {
     const trustedData = await request.validate(CategoryUpdateValidator);
 
     try {
-      await Category.query().where("id", id).update(trustedData);
+      await (await Category.findOrFail(id)).merge(trustedData).save();
       return response.ok({
         message: "Category updated successfully",
         data: trustedData,
@@ -68,10 +68,7 @@ export default class CategoryController {
     const { id } = await IDValidator.validate(params, "categories");
 
     try {
-      const data = await Category.query()
-        .where("id", id)
-        .preload("tasks")
-        .select();
+      const data = await Category.query().where("id", id).preload("tasks");
 
       return response.ok({
         message: "Category fetched successfully",

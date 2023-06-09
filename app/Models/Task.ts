@@ -22,7 +22,7 @@ export default class Task extends BaseModel {
   @column()
   public description: string;
 
-  @column()
+  @column({serializeAs: null})
   public categoryId: string;
 
   @hasOne(() => Category)
@@ -45,7 +45,8 @@ export default class Task extends BaseModel {
   public serializeExtras() {
     return {
       users_count: this.$extras.users_count,
-      categories_count: this.$extras.categories_count
+      categories_count: this.$extras.categories_count,
+      status: this.$extras.pivot_status
     };
   }
 }

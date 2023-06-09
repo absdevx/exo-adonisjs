@@ -41,9 +41,9 @@ export class TaskUpdateValidator {
 
     description: schema.string.optional(),
     users: schema
-      .array()
+      .array.optional()
       .members(schema.string([rules.exists({ table: "users", column: "id" })])),
-  });
+  })
 
   public messages: CustomMessages = {
     "title.*": "Titre invalide",

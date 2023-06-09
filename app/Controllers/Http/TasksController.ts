@@ -56,15 +56,11 @@ export default class TasksController {
   public async show({ params, response }: HttpContextContract) {
     const { id } = await IDValidator.validate(params, "tasks");
     try {
-      const tasks = await Task.findOrFail(id);
-      const data = await tasks
-        .related("users")
-        .query()
-        .select("tasks.*");
-        // .innerJoin("task_user", "tasks.id", id)
-      // .pivotColumns(["status"])
-
-      return response.ok({ message: "Task fetched with success", data: data });
+      const tasks = await Task.query()
+        .where("id", id)
+        .preload("users")
+        .select();
+      return response.ok({ message: "Task fetched with success", data: tasks });
     } catch (error) {
       return response.badRequest(error.message || error);
     }
@@ -73,25 +69,18 @@ export default class TasksController {
   /* Met à jour le Task avec les paramétres fournies */
   public async update({ params, request, response }: HttpContextContract) {
     const { id } = await IDValidator.validate(params, "tasks");
-    const { title, status, description, users, categoryId } =
-      await request.validate(TaskUpdateValidator);
-
+    const { users, ...trustedData } = await request.validate(TaskUpdateValidator);
+    
     try {
+
       const task = await Task.query().where("id", id).firstOrFail();
-      await task.merge({
-        title: title,
-        description: description,
-        categoryId: categoryId,
-      });
+      await task.merge({ ...trustedData }).save();
 
-      console.log("task updated: %s", task.id);
+      console.log("task updated: %s", task);
 
-      await task.related("users").sync(users, false);
-      console.log("Adding users:%s to task:%s", users, task.id);
-
-      await task.related("users").pivotQuery().update({ status: status });
-      console.log("Updating status task to '%s'", status);
-
+      if (users) 
+        await task.related("users").sync(users, false);
+      
       return response.ok({
         message: "Task updated successfully",
         data: request.all(),

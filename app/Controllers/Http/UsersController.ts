@@ -56,7 +56,7 @@ export default class UsersController {
     const trustedData = await request.validate(UserUpdateValidator);
 
     try {
-      await User.query().where("id", id).update(trustedData);
+      await (await User.findOrFail(id)).merge({...trustedData}).save();
       return response.ok({
         message: "User updated successfully",
         data: trustedData,

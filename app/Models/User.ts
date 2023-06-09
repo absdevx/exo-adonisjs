@@ -39,6 +39,7 @@ export default class User extends BaseModel {
   public serializeExtras() {
     return {
       tasks_count: this.$extras.tasks_count,
+      status: this.$extras.pivot_status
     };
   }
 }
