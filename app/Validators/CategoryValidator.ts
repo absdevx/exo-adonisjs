@@ -6,7 +6,7 @@ export class CategoryUpdateValidator {
 
   public schema = schema.create({
     name: schema.string.optional({ trim: true }, [
-      rules.unique({ table: "category", column: "name" }),
+      rules.unique({ table: "categories", column: "name" }),
     ]),
     description: schema.string.optional({ trim: true }, []),
   });
@@ -18,7 +18,7 @@ export class CategoryStoreValidator {
 
   public schema = schema.create({
     name: schema.string({ trim: true }, [
-      rules.unique({ table: "category", column: "name" }),
+      rules.unique({ table: "categories", column: "name" }),
     ]),
     description: schema.string({ trim: true }, []),
   });

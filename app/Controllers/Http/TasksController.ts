@@ -10,13 +10,15 @@ import {
 export default class TasksController {
   /* Crée un nouvel Task avec les paramètres fournies: */
   public async store({ request, response }: HttpContextContract) {
-    const { users, title, description, categoryId } = await request.validate(TaskValidator);
+    const { users, title, description, categoryId } = await request.validate(
+      TaskValidator
+    );
 
     try {
       const newTask = await Task.create({
         title: title,
         description: description,
-        categoryId: categoryId
+        categoryId: categoryId,
       });
       await newTask.related("users").attach(users);
       return response.created({
@@ -42,15 +44,9 @@ export default class TasksController {
   /* Récupère toutes les Tasks */
   // "Ajouter la fonction show, recuperer une tâche specific avec les infos des u◘tilisateus assigne";
   public async index({ response }: HttpContextContract) {
-    return Task
-    
     try {
-      const tasks = await Task.query()
-        .withCount("users")
-        .withCount("categories")
-        .preload("users")
-        .preload("categories")
-        .select(["tasks.*","status"]);
+      const tasks = await Task.query().withCount("users").select(["tasks.*"]);
+
       return response.ok(tasks);
     } catch (error) {
       return response.badRequest(error.message || error);
@@ -59,46 +55,52 @@ export default class TasksController {
 
   public async show({ params, response }: HttpContextContract) {
     const { id } = await IDValidator.validate(params, "tasks");
-     try {
-       const taskWithUsers = await Task.query()
-         .where("id", id)
-         .preload("users")
-         .select(["tasks.*", "users.*", "status"]);
-       return response.ok(taskWithUsers);
-     } catch (error) {
-       return response.badRequest(error.message || error);
-     }
+    try {
+      const tasks = await Task.findOrFail(id);
+      const data = await tasks
+        .related("users")
+        .query()
+        .select("tasks.*");
+        // .innerJoin("task_user", "tasks.id", id)
+      // .pivotColumns(["status"])
 
+      return response.ok({ message: "Task fetched with success", data: data });
+    } catch (error) {
+      return response.badRequest(error.message || error);
+    }
   }
 
   /* Met à jour le Task avec les paramétres fournies */
   public async update({ params, request, response }: HttpContextContract) {
-
     const { id } = await IDValidator.validate(params, "tasks");
-    const { title, status, description, users, categoryId } = await request.validate(
-      TaskUpdateValidator
-    );
+    const { title, status, description, users, categoryId } =
+      await request.validate(TaskUpdateValidator);
 
     try {
       const task = await Task.query().where("id", id).firstOrFail();
-      await task
-        .merge({
-          title: title,
-          description: description,
-          categoryId: categoryId
-        })
-        
+      await task.merge({
+        title: title,
+        description: description,
+        categoryId: categoryId,
+      });
+
       console.log("task updated: %s", task.id);
 
       await task.related("users").sync(users, false);
       console.log("Adding users:%s to task:%s", users, task.id);
 
       await task.related("users").pivotQuery().update({ status: status });
-      console.log("Updating status' task");
+      console.log("Updating status task to '%s'", status);
 
-      return response.ok(task);
+      return response.ok({
+        message: "Task updated successfully",
+        data: request.all(),
+      });
     } catch (error) {
-      return response.badRequest(error.message || error);
+      return response.badRequest({
+        error: error.message || error,
+        message: "Failed to update task",
+      });
     }
   }
   /* Supprime le Task en paramétre en utitisant l'ID fournie */

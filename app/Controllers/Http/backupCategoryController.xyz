@@ -1,9 +1,6 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import Category from "App/Models/Category";
-import {
-  CategoryStoreValidator,
-  CategoryUpdateValidator,
-} from "App/Validators/CategoryValidator";
+import { CategoryStoreValidator, CategoryUpdateValidator } from "App/Validators/CategoryValidator";
 import { IDValidator } from "App/Validators/IDValidator";
 
 const CATEGORIES_PER_PAGE = 3;
@@ -27,10 +24,11 @@ export default class CategoryController {
       });
     } catch (error) {
       return response.badRequest({
-        message: "Failed to retrieve categories",
+        message: "Failed to fetch categories",
         error: error.message || error,
       });
     }
+    return;
   }
   public async store({ request, response }: HttpContextContract) {
     const trustedData = await request.validate(CategoryStoreValidator);
@@ -65,7 +63,7 @@ export default class CategoryController {
     }
   }
   public async show({ params, response }: HttpContextContract) {
-    const { id } = await IDValidator.validate(params, "categories");
+    const { id } = await IDValidator.validate(params, "users");
 
     try {
       const data = await Category.query()
@@ -74,18 +72,18 @@ export default class CategoryController {
         .select();
 
       return response.ok({
-        message: "Category fetched successfully",
+        message: "Category updated successfully",
         data: data,
       });
     } catch (error) {
       return response.badRequest({
-        message: "Failed to fetch category data",
+        message: "Failed to show category data",
         error: error.message || error,
       });
     }
   }
   public async destroy({ params, response }: HttpContextContract) {
-    const { id } = await IDValidator.validate(params, "categories");
+    const { id } = await IDValidator.validate(params, "users");
 
     try {
       await Category.query().where("id", id).delete();

@@ -39,7 +39,7 @@ Route.group(() => {
   Route.get("/tasks/:id", "TasksController.show");
   Route.patch("/tasks/:id", "TasksController.update");
   Route.delete("/tasks/:id", "TasksController.destroy");
-  Route.get("/tasks/user/:id", "TasksController.getTasksByUser");
+  // Route.get("/tasks/user/:id", "TasksController.getTasksByUser");
 });
 
 Route.group(() => {

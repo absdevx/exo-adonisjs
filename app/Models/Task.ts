@@ -1,14 +1,16 @@
 import { DateTime } from "luxon";
 import {
   BaseModel,
-  BelongsTo,
+  HasMany,
+  HasOne,
   ManyToMany,
-  belongsTo,
   column,
+  hasMany,
+  hasOne,
   manyToMany,
 } from "@ioc:Adonis/Lucid/Orm";
 import User from "App/Models/User";
-import Category from "app/Models/Category";
+import Category from "App/Models/Category";
 
 export default class Task extends BaseModel {
   @column({ isPrimary: true })
@@ -23,8 +25,8 @@ export default class Task extends BaseModel {
   @column()
   public categoryId: string;
 
-  @belongsTo(() => Category)
-  public categories: BelongsTo<typeof Category>;
+  @hasOne(() => Category)
+  public categories: HasOne<typeof Category>;
 
   @manyToMany(() => User, {
     pivotTable: "task_user",

@@ -14,7 +14,6 @@ export default class UsersController {
   public async index({ request, response }: HttpContextContract) {
     const page = request.input("page", 1);
 
-    return await User.query();
     const max_of_limit = (await User.query()).length;
 
     let limit = request.input("limit", USER_PER_PAGE);
