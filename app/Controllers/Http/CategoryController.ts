@@ -7,6 +7,8 @@ import {
 import { IDValidator } from "App/Validators/IDValidator";
 
 export default class CategoryController {
+
+  // Affiche toutes les Category avec fonctionnalité de pagination
   public async index({ request, response }: HttpContextContract) {
     const { page = 1, limit = 10 } = request.qs();
 
@@ -28,6 +30,10 @@ export default class CategoryController {
       });
     }
   }
+
+  /*
+  Crée un nouvel Category avec les paramètres néccessaires
+  */
   public async store({ request, response }: HttpContextContract) {
     const trustedData = await request.validate(CategoryStoreValidator);
     try {
@@ -43,6 +49,10 @@ export default class CategoryController {
       });
     }
   }
+
+  /*
+  Met à jour le Category grâce à l'id et autres champs à mettre à jour
+  */
   public async update({ params, request, response }: HttpContextContract) {
     const { id } = await IDValidator.validate(params, "categories");
     const trustedData = await request.validate(CategoryUpdateValidator);
@@ -61,6 +71,10 @@ export default class CategoryController {
       });
     }
   }
+  /*
+  L'objectif est de pouvoir afficher les informations d'une Category
+  par le biais de <id> fournie en paramètre
+  */
   public async show({ params, response }: HttpContextContract) {
     const { id } = await IDValidator.validate(params, "categories");
 
@@ -69,11 +83,11 @@ export default class CategoryController {
 
       return response.ok({
         message: "Category fetched successfully",
-        data: data,
+        category: data,
       });
     } catch (error) {
       return response.badRequest({
-        message: "Failed to fetch category data",
+        message: "Failed to fetch category",
         error: error.message || error,
       });
     }
@@ -82,7 +96,7 @@ export default class CategoryController {
   // Supprime le Category donnée en utilisant l'ID fournie
   // Cette fonction vérifira s'il y a des Task associés à celle-ci,
   // Si oui, elle retourne une erreur sans supprimer quelque chose, sinon
-  // elle supprime simplement 
+  // elle supprime simplement la Categorie
   public async destroy({ params, response }: HttpContextContract) {
     const { id } = await IDValidator.validate(params, "categories");
 

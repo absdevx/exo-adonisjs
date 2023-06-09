@@ -1,7 +1,5 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import Category from "App/Models/Category";
 import Task from "App/Models/Task";
-import User from "App/Models/User";
 import { IDValidator } from "App/Validators/IDValidator";
 import {
   TaskValidator,
@@ -71,7 +69,7 @@ export default class TasksController {
     }
   }
 
-  /* Renvoie les informations d'une Task: le title, description et le nom de la catégorie
+  /* Renvoie les informations d'un Task: le title, description et le nom de sa catégorie
   */
   public async show({ params, response }: HttpContextContract) {
     const { id } = await IDValidator.validate(params, "tasks");

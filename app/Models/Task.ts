@@ -1,5 +1,4 @@
 import { DateTime } from "luxon";
-import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 
 import {
   BaseModel,

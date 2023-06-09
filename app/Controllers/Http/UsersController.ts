@@ -6,23 +6,21 @@ import {
   UserUpdateValidator,
 } from "App/Validators/UserValidator";
 
-
 export default class UsersController {
-  // Listing des Users disponibles avec pagination avec
-  // un nombre d'elements par page selon USER_PER_PAGE
+  // Listing des Users disponibles avec pagination
   public async index({ request, response }: HttpContextContract) {
-    const { page = 1, limit = 10 } = request.qs()
+    const { page = 1, limit = 10 } = request.qs();
 
     try {
       const pagination = await User.query()
         .withCount("tasks")
         .select(["users.*"])
         .paginate(page, limit);
-      
+
       return response.ok({
         message: "Data retrieved successfully",
         meta: pagination.getMeta(),
-        users: pagination.all()
+        users: pagination.all(),
       });
     } catch (error) {
       return response.badRequest({
@@ -38,7 +36,7 @@ export default class UsersController {
     dans le paramètre "query". Les résultats renvoyés doivent correspondre au om ou à l'adresse e-mail des utilisateurs.
   */
   public async search({ request, response }: HttpContextContract) {
-    const {page, limit, query} = request.qs()
+    const { page, limit, query } = request.qs();
     if (!query) return;
 
     try {
@@ -80,7 +78,6 @@ export default class UsersController {
     const trustedData = await request.validate(UserUpdateValidator);
 
     try {
-      
       const user = await User.findOrFail(id);
       await user.merge(trustedData).save();
 
@@ -120,10 +117,9 @@ export default class UsersController {
     const { id } = await IDValidator.validate(params, "users");
 
     try {
-      const user = await User.findOrFail(id)
+      const user = await User.findOrFail(id);
       await user.delete();
       return response.noContent();
-
     } catch (error) {
       return response.badRequest({
         error: "Failed to delete user",
