@@ -1,12 +1,13 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import User from "App/Models/User";
 import { IDValidator } from "App/Validators/IDValidator";
+import { UserQueryValidator } from "App/Validators/QueryValidator";
 import {
   UserStoreValidator,
   UserUpdateValidator,
 } from "App/Validators/UserValidator";
 
-const USER_PER_PAGE = 2;
+const USERS_PER_PAGE = 2;
 
 export default class UsersController {
   // Listing des Users disponibles avec pagination avec
@@ -16,7 +17,7 @@ export default class UsersController {
 
     const max_of_limit = (await User.query()).length;
 
-    let limit = request.input("limit", USER_PER_PAGE);
+    let limit = request.input("limit", USERS_PER_PAGE);
     if (limit > max_of_limit) limit = max_of_limit;
 
     try {
@@ -31,6 +32,34 @@ export default class UsersController {
     } catch (error) {
       return response.badRequest({
         message: "Failed to retrieved data",
+        error: error.messages || error,
+      });
+    }
+  }
+
+  public async search({ request, response }: HttpContextContract) {
+    const query = request.input("query", null);
+    if (!query) return;
+
+    const page: number = request.input("page", 1);
+    const maxLimit = (await User.query()).length;
+
+    let limit = request.input("limit", USERS_PER_PAGE);
+    if (limit > maxLimit) limit = maxLimit;
+
+    try {
+      const users = await User.query()
+        .whereILike("name", `%${query}%`)
+        .orWhereILike("email", `%${query}%`)
+        .paginate(page, limit);
+      
+      return response.ok({
+        message: "Search finished successfully",
+        data: users,
+      });
+    } catch (error) {
+      return response.badRequest({
+        message: "Failed to search users",
         error: error.messages || error,
       });
     }
@@ -56,7 +85,7 @@ export default class UsersController {
     const trustedData = await request.validate(UserUpdateValidator);
 
     try {
-      await (await User.findOrFail(id)).merge({...trustedData}).save();
+      await (await User.findOrFail(id)).merge({ ...trustedData }).save();
       return response.ok({
         message: "User updated successfully",
         data: trustedData,

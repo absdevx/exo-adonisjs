@@ -7,7 +7,36 @@ import {
   TaskUpdateValidator,
 } from "App/Validators/TaskValidator";
 
+const TASKS_PER_PAGE = 3;
+
 export default class TasksController {
+  public async search({ request, response }: HttpContextContract) {
+    const query = request.input("query", null);
+    if (!query) return;
+
+    const page: number = request.input("page", 1);
+    const maxLimit = (await Task.query()).length;
+
+    let limit = request.input("limit", TASKS_PER_PAGE);
+    if (limit > maxLimit) limit = maxLimit;
+
+    try {
+      const tasks = await Task.query()
+        .whereILike("title", `%${query}%`)
+        .orWhereILike("description", `%${query}%`)
+        .paginate(page, limit);
+      
+      return response.ok({
+        message: "Search finished successfully",
+        data: tasks,
+      });
+    } catch (error) {
+      return response.badRequest({
+        message: "Failed to search tasks",
+        error: error.messages || error,
+      });
+    }
+  }
   /* Crée un nouvel Task avec les paramètres fournies: */
   public async store({ request, response }: HttpContextContract) {
     const { users, title, description, categoryId } = await request.validate(
@@ -69,18 +98,18 @@ export default class TasksController {
   /* Met à jour le Task avec les paramétres fournies */
   public async update({ params, request, response }: HttpContextContract) {
     const { id } = await IDValidator.validate(params, "tasks");
-    const { users, ...trustedData } = await request.validate(TaskUpdateValidator);
-    
-    try {
+    const { users, ...trustedData } = await request.validate(
+      TaskUpdateValidator
+    );
 
+    try {
       const task = await Task.query().where("id", id).firstOrFail();
       await task.merge({ ...trustedData }).save();
 
       console.log("task updated: %s", task);
 
-      if (users) 
-        await task.related("users").sync(users, false);
-      
+      if (users) await task.related("users").sync(users, false);
+
       return response.ok({
         message: "Task updated successfully",
         data: request.all(),

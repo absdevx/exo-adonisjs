@@ -26,6 +26,7 @@ Route.get('/', async ({ view }) => {
 })*/
 
 Route.group(() => {
+  Route.get("/users/search", "UsersController.search")
   Route.post("/users", "UsersController.store");
   Route.get("/users", "UsersController.index");
   Route.patch("/users/:id", "UsersController.update");
@@ -34,6 +35,7 @@ Route.group(() => {
 });
 
 Route.group(() => {
+  Route.get("/tasks/search", "TasksController.search");
   Route.get("/tasks", "TasksController.index");
   Route.post("/tasks", "TasksController.store");
   Route.get("/tasks/:id", "TasksController.show");
