@@ -8,12 +8,16 @@ export default class extends BaseSeeder {
 
     const tasks = await TaskFactory.with("category", 1)
       .with("users", nbre_users, (user) => {
-        user.pivotAttributes({status: TaskStatus.TERMINE})
+        user.pivotAttributes({ status: TaskStatus.EN_COURS });
       })
       .createMany(5);
-    
+
     tasks.forEach((task) => {
-      console.log("New task: %s", task.toJSON());
+      console.log("New task: %s", [
+        task.title,
+        task.category.name,
+        task.users.length,
+      ]);
     });
   }
 }

@@ -3,12 +3,14 @@ import User from "App/Models/User";
 import Factory from "@ioc:Adonis/Lucid/Factory";
 import Category from "App/Models/Category";
 
+let category_counter = 1;
 export const CategoryFactory = Factory.define(Category, ({ faker }) => {
   return {
-    name: `Category N°${faker.number.int({min: 1, max: 10, })}`,
+    name: `Category N°${category_counter++}`,
     description: faker.lorem.paragraph(),
   };
 }).build();
+
 
 export const UserFactory = Factory.define(User, ({ faker }) => {
   return {
@@ -17,9 +19,10 @@ export const UserFactory = Factory.define(User, ({ faker }) => {
   };
 }).build();
 
+let task_counter = 1;
 export const TaskFactory = Factory.define(Task, ({ faker }) => {
   return {
-    title: `Task N°${faker.number.int({min: 1, max: 10, })}`,
+    title: `Task N°${task_counter++}`,
     description: faker.lorem.paragraph(),
   };
 })
