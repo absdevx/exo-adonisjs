@@ -21,11 +21,11 @@ export class TaskValidator {
       .members(schema.string([rules.exists({ table: "users", column: "id" })])),
   });
 
-   public messages = {
-    "title.unique": "Titre invalide",
-    "title.required": "Titre invalide",
-    "description.maxLength": "Description trop long",
-    "users.*.exists": "ID utilisateur incorrect",
+  public messages = {
+    unique: "{{ field }} invalide",
+    required: "{{ field }} invalide",
+    maxLength: "{{ field }} trop long",
+    "users.*.exists": "ID+ utilisateur incorrect",
   };
 }
 
@@ -40,10 +40,10 @@ export class TaskUpdateValidator {
     ]),
 
     description: schema.string.optional(),
-    users: schema
-      .array.optional()
+    users: schema.array
+      .optional()
       .members(schema.string([rules.exists({ table: "users", column: "id" })])),
-  })
+  });
 
   public messages: CustomMessages = {
     "title.*": "Titre invalide",
