@@ -45,7 +45,7 @@ export default class TasksController {
         data: newTask,
       });
     } catch (error) {
-      return response.badRequest({ error: error.message || error });
+      return response.badRequest({ message: "Failed to create task", error: error.message || error });
     }
   }
   /* Récupère toutes les Tasks disponibles */
